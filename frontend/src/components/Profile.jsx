@@ -388,7 +388,7 @@ function Profile() {
             endAdornment: <InputAdornment position='end'>KG</InputAdornment>,
           }}
           inputProps={{
-            inputMode: 'numeric',
+            inputMode: 'decimal',
           }}
           value={startWeight}
           onChange={(e) => {
@@ -408,7 +408,7 @@ function Profile() {
               endAdornment: <InputAdornment position='end'>%</InputAdornment>,
             }}
             inputProps={{
-              inputMode: 'numeric',
+              inputMode: 'decimal',
             }}
             type='number'
             value={startBodyFat}
@@ -582,7 +582,7 @@ function Profile() {
                   ),
                 }}
                 inputProps={{
-                  inputMode: 'numeric',
+                  inputMode: 'decimal',
                 }}
                 value={targetWeight}
                 onChange={(e) => {
