@@ -386,6 +386,8 @@ function Profile() {
           label='Start Weight (시작 몸무게)'
           InputProps={{
             endAdornment: <InputAdornment position='end'>KG</InputAdornment>,
+          }}
+          inputProps={{
             inputMode: 'numeric',
           }}
           value={startWeight}
@@ -400,12 +402,15 @@ function Profile() {
           <TextField
             fullWidth
             label='Start Body Fat % (시작 체지방률)'
+            variant='standard'
+            placeholder='20'
             InputProps={{
               endAdornment: <InputAdornment position='end'>%</InputAdornment>,
+            }}
+            inputProps={{
               inputMode: 'numeric',
             }}
             type='number'
-            variant='standard'
             value={startBodyFat}
             onChange={(e) => {
               e.target.value
@@ -575,6 +580,8 @@ function Profile() {
                   endAdornment: (
                     <InputAdornment position='end'>KG</InputAdornment>
                   ),
+                }}
+                inputProps={{
                   inputMode: 'numeric',
                 }}
                 value={targetWeight}
@@ -705,7 +712,7 @@ function Profile() {
                   maxRows={2}
                   placeholder='달성하고 싶은 이유'
                   label='달성하고 싶은 이유'
-                  inputProps={{ style: { fontSize: 12 } }}
+                  // inputProps={{ style: { fontSize: 20 } }}
                   value={reasonForDiet}
                   onChange={(e) => {
                     setReasonForDiet(e.target.value)
@@ -717,7 +724,7 @@ function Profile() {
                   maxRows={2}
                   placeholder='달성하고 가장 하고 싶은 것'
                   label='달성하고 가장 하고 싶은 것'
-                  inputProps={{ style: { fontSize: 12 } }}
+                  // inputProps={{ style: { fontSize: 20 } }}
                   value={rewardAfterDiet}
                   onChange={(e) => {
                     setRewardAfterDiet(e.target.value)

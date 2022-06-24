@@ -93,7 +93,11 @@ function Signup() {
   }
 
   return (
-    <Container>
+    <Container
+      sx={{
+        pt: 3,
+      }}
+    >
       <Stack
         spacing={5}
         justifyContent='center'
@@ -123,7 +127,7 @@ function Signup() {
           placeholder='01012345678'
           value={phoneNumber}
           onChange={handlePhoneNumber}
-          InputProps={{
+          inputProps={{
             inputMode: 'numeric',
           }}
         />
@@ -149,7 +153,7 @@ function Signup() {
             placeholder='01012345678'
             value={confirmPhoneNumber}
             onChange={handleConfirmPhoneNumber}
-            InputProps={{
+            inputProps={{
               inputMode: 'numeric',
             }}
           />
@@ -205,6 +209,8 @@ function Signup() {
           label='Height'
           InputProps={{
             endAdornment: <InputAdornment position='end'>CM</InputAdornment>,
+          }}
+          inputProps={{
             inputMode: 'numeric',
           }}
           type='number'
@@ -213,22 +219,23 @@ function Signup() {
           value={height}
           onChange={(e) => setHeight(e.target.value)}
         />
-
-        <Button
-          disabled={buttonDisabled}
-          fullWidth
-          variant='contained'
-          onClick={handleSignup}
-        >
-          Create Account
-        </Button>
-        <Typography
-          sx={{
-            color: 'tomato',
-          }}
-        >
-          {errorMessage}
-        </Typography>
+        <Stack>
+          <Button
+            disabled={buttonDisabled}
+            fullWidth
+            variant='contained'
+            onClick={handleSignup}
+          >
+            Create Account
+          </Button>
+          <Typography
+            sx={{
+              color: 'tomato',
+            }}
+          >
+            {errorMessage}
+          </Typography>
+        </Stack>
       </Stack>
     </Container>
   )
