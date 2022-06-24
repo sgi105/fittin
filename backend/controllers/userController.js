@@ -3,13 +3,48 @@ const { use } = require('express/lib/application')
 const User = require('../models/userModel')
 const getDaysBetweenDates = require('../utils')
 
+const createUser = asyncHandler(async (req, res) => {
+  const { phoneNumber, name, gender, birthday, height } = req.body
+
+  if (!(phoneNumber && name && gender && birthday && height))
+    return res.status(200).json({
+      status: 400,
+      message: 'Please provide phoneNumber, name, birthday and height',
+    })
+
+  // 이미 같은 번호로 있으면 에러
+  const duplicatePhoneNumber = await User.findOne({ phoneNumber })
+  if (duplicatePhoneNumber)
+    return res.status(200).json({
+      status: 400,
+      message: 'You are already registered',
+    })
+
+  const result = await User.create({
+    phoneNumber,
+    name,
+    gender,
+    birthday,
+    height,
+    goals: [],
+    weights: [],
+  })
+
+  // response
+  return res.status(200).json({
+    status: 200,
+    data: result,
+  })
+})
+
 // @desc get user data
 // @route GET /user/:number
 const getUser = asyncHandler(async (req, res) => {
-  let number = req.params.number
+  let phoneNumber = req.params.phoneNumber
+  console.log(phoneNumber)
 
   // find user
-  const user = await User.findOne({ number })
+  const user = await User.findOne({ phoneNumber })
 
   if (!user) {
     return res.status(200).json({
@@ -22,6 +57,62 @@ const getUser = asyncHandler(async (req, res) => {
       data: user,
     })
   }
+})
+
+// Goal 저장
+const updateUser = asyncHandler(async (req, res) => {
+  const { goal, phoneNumber } = req.body
+  const {
+    startDate,
+    endDate,
+    startWeight,
+    startBodyFat,
+    targetWeight,
+    targetBodyFat,
+    dietMode,
+    dietSpeed,
+    thisPlanTargetWeight,
+    thisPlanAchieveDate,
+    reasonForDiet,
+    rewardAfterDiet,
+  } = goal
+
+  if (
+    !(
+      startDate &&
+      endDate &&
+      startWeight &&
+      startBodyFat &&
+      targetWeight &&
+      (targetBodyFat || dietMode === 'gain') &&
+      dietMode &&
+      dietSpeed &&
+      thisPlanTargetWeight &&
+      thisPlanAchieveDate &&
+      reasonForDiet &&
+      rewardAfterDiet
+    )
+  )
+    return res.status(200).json({
+      status: 400,
+      message: 'Please provide all the information',
+    })
+
+  const user = await User.findOne({ phoneNumber })
+
+  if (!user)
+    return res.status(200).json({
+      status: 404,
+      message: 'User not found',
+    })
+  user.goals[0] = goal
+  const result = await user.save()
+
+  // response
+  return res.status(200).json({
+    status: 200,
+    data: result,
+  })
 })
 
 // @desc 새로운 러닝 정보 입력하고 streak, totalDistance 받기
@@ -138,37 +229,4 @@ const logRun = asyncHandler(async (req, res) => {
   })
 })
 
-const createUser = asyncHandler(async (req, res) => {
-  const { number, name, gender } = req.body
-
-  if (!(number && name && gender))
-    return res.status(200).json({
-      status: 400,
-      message: 'Please provide number, name, and gender',
-    })
-
-  // 이미 같은 번호로 있으면 에러
-  const duplicateNumber = await User.findOne({ number })
-  if (duplicateNumber)
-    return res.status(200).json({
-      status: 400,
-      message: 'You are already registered',
-    })
-
-  const result = await User.create({
-    number,
-    name,
-    gender,
-    totalDistance: 0,
-    streak: 0,
-    runs: [],
-  })
-
-  // response
-  return res.status(200).json({
-    status: 200,
-    data: result,
-  })
-})
-
-module.exports = { logRun, createUser, getUser }
+module.exports = { logRun, createUser, getUser, updateUser }

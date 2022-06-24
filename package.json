@@ -10,6 +10,7 @@
     "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix frontend && npm run build --prefix frontend"
   },
   "dependencies": {
+    "@mui/x-date-pickers": "^5.0.0-alpha.6",
     "colors": "^1.4.0",
     "concurrently": "^7.2.1",
     "cookie-parser": "~1.4.4",

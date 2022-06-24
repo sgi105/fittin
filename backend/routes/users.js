@@ -1,13 +1,13 @@
 var express = require('express')
 var router = express.Router()
 const {
-  logRun,
   createUser,
   getUser,
+  updateUser,
 } = require('../controllers/userController.js')
 
-router.post('/log', logRun)
 router.post('/', createUser)
-router.get('/:number', getUser)
+router.get('/:phoneNumber', getUser)
+router.put('/', updateUser)
 
 module.exports = router

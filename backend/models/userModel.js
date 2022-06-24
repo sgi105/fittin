@@ -1,22 +1,44 @@
 const mongoose = require('mongoose')
 
-const runSchema = mongoose.Schema({
-  time: Date,
-  date: Date,
-  distance: Number,
-  timeInSeconds: Number,
-  timezone: String,
-  dateInUserTimeZone: String,
-})
+const goalSchema = mongoose.Schema(
+  {
+    startDate: Date,
+    endDate: Date,
+    startWeight: Number,
+    startBodyFat: Number,
+    targetWeight: Number,
+    targetBodyFat: Number,
+    dietMode: String,
+    dietSpeed: Number,
+    thisPlanTargetWeight: Number,
+    thisPlanAcheiveDate: Date,
+    reasonForDiet: String,
+    rewardAfterDiet: String,
+  },
+  {
+    timestamps: true,
+  }
+)
+
+const weightSchema = mongoose.Schema(
+  {
+    date: Date,
+    weight: Number,
+  },
+  {
+    timestamps: true,
+  }
+)
 
 const userSchema = mongoose.Schema(
   {
-    number: String,
+    phoneNumber: String,
     name: String,
     gender: String,
-    totalDistance: Number,
-    streak: Number,
-    runs: [runSchema],
+    birthday: Date,
+    height: Number,
+    goals: [goalSchema],
+    weights: [weightSchema],
   },
   {
     timestamps: true,
