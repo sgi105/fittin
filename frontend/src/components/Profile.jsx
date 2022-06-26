@@ -69,11 +69,15 @@ function Profile() {
   const open = Boolean(anchorEl)
 
   const getUserData = async () => {
-    const data = JSON.parse(window.localStorage.getItem('USER_PHONE_NUMBER'))
+    const userPhoneNumber = JSON.parse(
+      window.localStorage.getItem('USER_PHONE_NUMBER')
+    )
 
-    console.log(data)
+    console.log(userPhoneNumber)
     try {
-      const res = await axios.get(url.users + `/${data}`, { baseURL: '/' })
+      const res = await axios.get(url.users + `/${userPhoneNumber}`, {
+        baseURL: '/',
+      })
       if (res.data.status === 200) {
         let user = res.data.data
         console.log(user)

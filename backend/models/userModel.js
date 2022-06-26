@@ -24,6 +24,7 @@ const weightSchema = mongoose.Schema(
   {
     date: Date,
     weight: Number,
+    logged: Boolean,
   },
   {
     timestamps: true,
