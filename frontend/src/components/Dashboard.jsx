@@ -147,9 +147,9 @@ function Dashboard() {
             62.5KG
           </Typography> */}
         </Stack>
-        <Typography variant='caption' textAlign='right' color='gray'>
+        {/* <Typography variant='caption' textAlign='right' color='gray'>
           62.7KG (22/06/25)
-        </Typography>
+        </Typography> */}
         <Box
           sx={{
             borderTop: 'solid 1px gray',
