@@ -78,13 +78,17 @@ function Logger() {
 
   const loadCurrentDateWeight = (weights) => {
     if (weights.length > 0) {
-      weights.forEach((elem, index) => {
+      for (let i = 0; i < weights.length; i++) {
+        let elem = weights[i]
         if (
           formatDateToString(new Date(elem.date)) === formatDateToString(date)
         ) {
           setWeight(elem.weight.toFixed(1))
+          break
+        } else {
+          setWeight('')
         }
-      })
+      }
     }
   }
 

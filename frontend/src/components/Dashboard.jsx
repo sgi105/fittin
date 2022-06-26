@@ -4,6 +4,13 @@ import { Stack, Typography, Box } from '@mui/material'
 import * as V from 'victory'
 import CircleIcon from '@mui/icons-material/Circle'
 import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
+import { useState, useEffect } from 'react'
+import url from '../utils/urls'
+import removeTime from '../utils/removeTime'
+import formatDateToString from '../utils/formatDateToString'
+import axios from 'axios'
+import { set } from 'mongoose'
+
 let data2 = [
   { x: '4/1/2022', y: 65.6 },
   { x: '4/2/2022', y: 65.6 },
@@ -98,7 +105,58 @@ const makeDataDateObjects = (data) => {
 }
 
 function Dashboard() {
-  data2 = makeDataDateObjects(data2)
+  // data2 = makeDataDateObjects(data2)
+  const [weights, setWeights] = useState([])
+  const [recentWeight, setRecentWeight] = useState({})
+  const [logCount, setLogCount] = useState(0)
+
+  useEffect(() => {
+    getUserData()
+  }, [])
+
+  const getUserData = async () => {
+    const phoneNumber = JSON.parse(
+      window.localStorage.getItem('USER_PHONE_NUMBER')
+    )
+
+    try {
+      const res = await axios.get(url.users + `/${phoneNumber}`, {
+        baseURL: '/',
+      })
+
+      if (res.data.status === 200) {
+        let user = res.data.data
+        console.log(user)
+        let weights = user.weights
+        setWeights(weights)
+
+        let logArray = []
+        for (let i = 1; i <= 7; i++) {
+          if (i <= weights.length)
+            logArray.push(<CircleIcon sx={{ fontSize: 45, color: 'green' }} />)
+          else {
+            logArray.push(
+              <CircleOutlinedIcon sx={{ fontSize: 45, color: 'black' }} />
+            )
+          }
+        }
+
+        setLogCount(logArray)
+
+        // get the most recent weight data if available
+        if (weights.length > 0) {
+          let recentWeight = weights[weights.length - 1].weight
+          let recentDate = weights[weights.length - 1].date
+          setRecentWeight({
+            weight: recentWeight,
+            date: formatDateToString(new Date(recentDate)),
+          })
+        }
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
 
   return (
     <div>
@@ -113,7 +171,9 @@ function Dashboard() {
           </Typography>
 
           <Stack direction={'row'} justifyContent='center'>
-            <CircleIcon sx={{ fontSize: 45, color: 'green' }} />
+            {logCount}
+
+            {/* <CircleIcon sx={{ fontSize: 45, color: 'green' }} />
             <CircleOutlinedIcon
               sx={{ fontWeight: 200, fontSize: 45, color: 'black' }}
             />
@@ -131,7 +191,7 @@ function Dashboard() {
             />
             <CircleOutlinedIcon
               sx={{ fontWeight: 200, fontSize: 45, color: 'black' }}
-            />
+            /> */}
           </Stack>
 
           {/* <Typography variant='h5' textAlign='center'>
