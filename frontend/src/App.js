@@ -19,8 +19,8 @@ function App() {
       <Router>
         <Routes>
           <Route path='/home' element={<BottomNav />}>
-            <Route index element={<Profile />} />
-            <Route path='logger' element={<Logger />} />
+            <Route path='profile' element={<Profile />} />
+            <Route index element={<Logger />} />
             <Route path='dashboard' element={<Dashboard />} />
           </Route>
           <Route path='/' element={<Login />} />

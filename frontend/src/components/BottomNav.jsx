@@ -15,9 +15,9 @@ function BottomNav() {
 
   useEffect(() => {
     console.log(window.location.href)
-    if (window.location.href.includes('logger')) setBottomNavValue(0)
+    if (window.location.href.includes('profile')) setBottomNavValue(2)
     else if (window.location.href.includes('dashboard')) setBottomNavValue(1)
-    else setBottomNavValue(2)
+    else setBottomNavValue(0)
   }, [])
 
   return (
@@ -41,7 +41,7 @@ function BottomNav() {
         >
           <BottomNavigationAction
             onClick={() => {
-              navigate('/home/logger')
+              navigate('/home')
             }}
             label='Weight'
             icon={<AddCircleOutlineIcon />}
@@ -55,7 +55,7 @@ function BottomNav() {
           />
           <BottomNavigationAction
             onClick={() => {
-              navigate('/home')
+              navigate('/home/profile')
             }}
             label='Mypage'
             icon={<PersonIcon />}
