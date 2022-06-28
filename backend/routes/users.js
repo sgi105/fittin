@@ -5,9 +5,11 @@ const {
   getUser,
   updateUser,
   logWeight,
+  runUtil,
 } = require('../controllers/userController.js')
 
 router.post('/', createUser)
+router.get('/runutil', runUtil)
 router.get('/:phoneNumber', getUser)
 router.put('/', updateUser)
 router.post('/log', logWeight)

@@ -20,7 +20,7 @@ const goalSchema = mongoose.Schema(
   }
 )
 
-const weightSchema = mongoose.Schema(
+const weightLogSchema = mongoose.Schema(
   {
     date: Date,
     weight: Number,
@@ -38,8 +38,8 @@ const userSchema = mongoose.Schema(
     gender: String,
     birthday: Date,
     height: Number,
-    goals: [goalSchema],
-    weights: [weightSchema],
+    goals: { default: [], type: [goalSchema] },
+    weightLogs: { default: [], type: [weightLogSchema] },
   },
   {
     timestamps: true,

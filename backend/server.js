@@ -9,7 +9,7 @@ var http = require('http')
 
 // ping the site so that it doesn't go down(heroku shuts it down when there is no ping)
 setInterval(function () {
-  http.get('http://run-everyday.herokuapp.com')
+  http.get('http://fittin.herokuapp.com')
   console.log('ping')
 }, 300000) // every 5 minutes (300000)
 

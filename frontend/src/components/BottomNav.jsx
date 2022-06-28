@@ -18,7 +18,7 @@ function BottomNav() {
     if (window.location.href.includes('profile')) setBottomNavValue(2)
     else if (window.location.href.includes('dashboard')) setBottomNavValue(1)
     else setBottomNavValue(0)
-  }, [])
+  }, [window.location.href])
 
   return (
     <Container

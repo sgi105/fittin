@@ -127,7 +127,7 @@ function Dashboard() {
       if (res.data.status === 200) {
         let user = res.data.data
         console.log(user)
-        let weights = user.weights
+        let weights = user.weightLogs
         setWeights(weights)
 
         let logArray = []

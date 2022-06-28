@@ -26,8 +26,6 @@ const createUser = asyncHandler(async (req, res) => {
     gender,
     birthday,
     height,
-    goals: [],
-    weights: [],
   })
 
   // response
@@ -118,11 +116,11 @@ const updateUser = asyncHandler(async (req, res) => {
 // @desc 새로운 체중 정보 입력하기
 // @route POST /users
 const logWeight = asyncHandler(async (req, res) => {
-  let { date, weight, phoneNumber } = req.body
-  console.log(date)
+  // takes in array of new weights
+  let { newWeights, phoneNumber } = req.body
 
   // invalid input
-  if (!(date && weight && phoneNumber))
+  if (!(newWeights[0].date && newWeights[0].weight && phoneNumber))
     return res.status(200).json({
       status: 400,
       message: 'Please provide date, weight, and number',
@@ -133,21 +131,38 @@ const logWeight = asyncHandler(async (req, res) => {
 
   // 일단 과거 기록 막자.
 
-  // 이미 있는 날짜인지 확인하기
-  let updatedExistingValue = false
+  // newWeights 마다 이미 있는 값인지 확인하고, 없으면 새로 추가하기. 근데 날짜 순서대로 추가해야한다. 그건 프론트에서 알아서 주나?
 
-  user.weights.forEach((elem, index) => {
-    if (
-      formatDateToString(new Date(elem.date)) ===
-      formatDateToString(new Date(date))
-    ) {
-      elem.weight = weight
-      updatedExistingValue = true
+  console.log('user Found', user)
+  console.log('newWeights', newWeights)
+
+  newWeights.forEach((newWeight, index) => {
+    console.log('here1')
+
+    // 이미 있는 날짜인지 확인하기
+    let updatedExistingValue = false
+
+    user.weightLogs.forEach((weightLog, index) => {
+      console.log('here2')
+
+      if (
+        formatDateToString(new Date(weightLog.date)) ===
+        formatDateToString(new Date(newWeight.date))
+      ) {
+        console.log('same date found. Updating')
+        user.weightLogs[index] = newWeight
+        updatedExistingValue = true
+      }
+    })
+
+    console.log(updatedExistingValue)
+
+    // 새로운 몸무게면 추가
+    if (!updatedExistingValue) {
+      user.weightLogs.push(newWeight)
+      console.log('inserting new data')
     }
   })
-
-  // 새로운 몸무게면 추가
-  !updatedExistingValue && user.weights.push({ date, weight, logged: true })
 
   let result = await user.save()
 
@@ -173,4 +188,15 @@ const logWeight = asyncHandler(async (req, res) => {
   // 가장 최근 몸무게 날짜와 기록한 날짜 사이에 있는 값들 중 logged=false 인 것들 업데이트하기
 })
 
-module.exports = { logWeight, createUser, getUser, updateUser }
+const runUtil = asyncHandler(async (req, res) => {
+  const result = await User.updateMany(
+    {},
+    { $rename: { weights: 'weightLogs' } }
+  )
+  // response
+  return res.status(200).json({
+    status: 200,
+    data: result,
+  })
+})
+module.exports = { logWeight, createUser, getUser, updateUser, runUtil }
