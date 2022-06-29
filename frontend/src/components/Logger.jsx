@@ -204,7 +204,7 @@ function Logger() {
       <Stack mt={3} spacing={3}>
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <DatePicker
-            // disabled
+            disabled
             label='Date'
             value={date}
             inputFormat={'yyyy-MM-dd'}
@@ -235,7 +235,7 @@ function Logger() {
           )}
 
           <TextField
-            disabled
+            // disabled
             id='weight-input'
             variant='standard'
             placeholder={recentWeight.weight?.toFixed(1) || '00.0'}
