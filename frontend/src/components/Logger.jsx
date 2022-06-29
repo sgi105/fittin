@@ -235,7 +235,7 @@ function Logger() {
           )}
 
           <TextField
-            // disabled
+            disabled
             id='weight-input'
             variant='standard'
             placeholder={recentWeight.weight?.toFixed(1) || '00.0'}
