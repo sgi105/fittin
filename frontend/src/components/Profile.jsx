@@ -34,6 +34,7 @@ import url from '../utils/urls'
 import Snackbar from '@mui/material/Snackbar'
 import IconButton from '@mui/material/IconButton'
 import CloseIcon from '@mui/icons-material/Close'
+import { getUserData } from '../apiCalls/getUserData'
 
 function Profile() {
   // user basic profile states
@@ -42,6 +43,7 @@ function Profile() {
   const [gender, setGender] = useState('')
   const [birthday, setBirthday] = useState(null)
   const [height, setHeight] = useState('')
+  const [user, setUser] = useState()
 
   // layout states
   const [anchorEl, setAnchorEl] = React.useState(null)
@@ -68,54 +70,41 @@ function Profile() {
 
   const open = Boolean(anchorEl)
 
-  const getUserData = async () => {
-    const userPhoneNumber = JSON.parse(
-      window.localStorage.getItem('USER_PHONE_NUMBER')
-    )
-
-    console.log(userPhoneNumber)
-    try {
-      const res = await axios.get(url.users + `/${userPhoneNumber}`, {
-        baseURL: '/',
-      })
-      if (res.data.status === 200) {
-        let user = res.data.data
-        console.log(user)
-        setName(user.name)
-        setPhoneNumber(user.phoneNumber)
-        setGender(user.gender)
-        setBirthday(user.birthday)
-        setHeight(user.height)
-
-        if (user.goals[0]) {
-          const goal = user.goals[0]
-
-          console.log(new Date(goal.startDate))
-          console.log(new Date(goal.endDate))
-          // console.log(new Date(goal.thisPlanAchieveDate))
-
-          setStartDate(new Date(goal.startDate))
-          setEndDate(new Date(goal.endDate))
-          setStartWeight(goal.startWeight)
-          setStartBodyFat(goal.startBodyFat)
-          setTargetWeight(goal.targetWeight)
-          setTargetBodyFat(goal.targetBodyFat)
-          setDietMode(goal.dietMode)
-          setDietSpeed(goal.dietSpeed)
-          setThisPlanTargetWeight(goal.thisPlanTargetWeight)
-          // setThisPlanAchieveDate(goal.thisPlanAchieveDate)
-          setReasonForDiet(goal.reasonForDiet)
-          setRewardAfterDiet(goal.rewardAfterDiet)
-        }
-      }
-    } catch (err) {
-      console.log(err)
-    }
-  }
+  useEffect(() => {
+    getUserData(setUser)
+  }, [])
 
   useEffect(() => {
-    getUserData()
-  }, [])
+    if (user) {
+      console.log(user)
+      setName(user.name)
+      setPhoneNumber(user.phoneNumber)
+      setGender(user.gender)
+      setBirthday(user.birthday)
+      setHeight(user.height)
+
+      if (user.goals[0]) {
+        const goal = user.goals[0]
+
+        console.log(new Date(goal.startDate))
+        console.log(new Date(goal.endDate))
+        // console.log(new Date(goal.thisPlanAchieveDate))
+
+        setStartDate(new Date(goal.startDate))
+        setEndDate(new Date(goal.endDate))
+        setStartWeight(goal.startWeight)
+        setStartBodyFat(goal.startBodyFat)
+        setTargetWeight(goal.targetWeight)
+        setTargetBodyFat(goal.targetBodyFat)
+        setDietMode(goal.dietMode)
+        setDietSpeed(goal.dietSpeed)
+        setThisPlanTargetWeight(goal.thisPlanTargetWeight)
+        // setThisPlanAchieveDate(goal.thisPlanAchieveDate)
+        setReasonForDiet(goal.reasonForDiet)
+        setRewardAfterDiet(goal.rewardAfterDiet)
+      }
+    }
+  }, [user])
 
   useEffect(() => {
     if (dietMode === 'lose' && startWeight && startBodyFat && targetBodyFat) {

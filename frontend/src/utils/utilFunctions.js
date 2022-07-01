@@ -69,9 +69,9 @@ function getMonday(date) {
 }
 
 const formatDateToString = (dateObject) => {
-  var dd = String(dateObject.getDate()).padStart(2, '0')
-  var mm = String(dateObject.getMonth() + 1).padStart(2, '0') //January is 0!
-  var yyyy = dateObject.getFullYear()
+  var dd = String(new Date(dateObject).getDate()).padStart(2, '0')
+  var mm = String(new Date(dateObject).getMonth() + 1).padStart(2, '0') //January is 0!
+  var yyyy = new Date(dateObject).getFullYear()
 
   let date = yyyy + '-' + mm + '-' + dd
   return date
@@ -83,4 +83,10 @@ function isSameDay(date1, date2) {
 
   return formatDateToString(date1) === formatDateToString(date2)
 }
-export { getSimpleMovingAverageArray, getEWMAArray, getMonday, isSameDay }
+export {
+  getSimpleMovingAverageArray,
+  getEWMAArray,
+  getMonday,
+  isSameDay,
+  formatDateToString,
+}

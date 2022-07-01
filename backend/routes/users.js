@@ -6,12 +6,16 @@ const {
   updateUser,
   logWeight,
   runUtil,
+  getTotalHabitScoreBoard,
+  autoUpdateHabits,
 } = require('../controllers/userController.js')
 
 router.post('/', createUser)
 router.get('/runutil', runUtil)
-router.get('/:phoneNumber', getUser)
+router.get('/autoupdatehabits/:UTCHour', autoUpdateHabits)
+router.post('/userdata', getUser)
 router.put('/', updateUser)
 router.post('/log', logWeight)
+router.get('/totalhabitscoreboard', getTotalHabitScoreBoard)
 
 module.exports = router

@@ -31,6 +31,30 @@ const weightLogSchema = mongoose.Schema(
   }
 )
 
+const habitSchema = mongoose.Schema(
+  {
+    date: Date,
+    weigh: String,
+    exercise: Boolean,
+    diet: Boolean,
+  },
+  {
+    timestamps: true,
+  }
+)
+
+const pointSchema = mongoose.Schema(
+  {
+    date: Date,
+    point: Number,
+    type: String,
+    description: String,
+  },
+  {
+    timestamps: true,
+  }
+)
+
 const userSchema = mongoose.Schema(
   {
     phoneNumber: String,
@@ -38,8 +62,11 @@ const userSchema = mongoose.Schema(
     gender: String,
     birthday: Date,
     height: Number,
+    point: Number,
     goals: { default: [], type: [goalSchema] },
     weightLogs: { default: [], type: [weightLogSchema] },
+    habitLogs: { delfault: [], type: [habitSchema] },
+    pointLogs: { delfault: [], type: [pointSchema] },
   },
   {
     timestamps: true,

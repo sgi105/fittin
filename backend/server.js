@@ -13,6 +13,26 @@ setInterval(function () {
   console.log('ping')
 }, 300000) // every 5 minutes (300000)
 
+const fireEverydayOnTime = (UTCHour = 15) => {
+  setInterval(() => {
+    const now = new Date()
+    // console.log(now.getUTCHours(), now.getMinutes())
+
+    if (now.getMinutes() === 0 && now.getUTCHours() === UTCHour) {
+      // fires everyday on UTCHour : Korea = 15
+      // copy later
+      const baseURL =
+        process.env.NODE_ENV === 'production'
+          ? 'http://fittin.herokuapp.com'
+          : 'http://localhost:8000'
+      http.get(baseURL + `/api/users/autoupdatehabits/${UTCHour}`)
+    }
+  }, 60000)
+}
+
+fireEverydayOnTime(15)
+// http.get('http://localhost:8000/api/users/01042403121')
+
 // Connect to database
 const connectDB = require('./config/db')
 connectDB()

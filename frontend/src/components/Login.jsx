@@ -4,12 +4,19 @@ import { useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import axios from 'axios'
 import url from '../utils/urls'
+import { getUserData } from '../apiCalls/getUserData'
+import { useEffect } from 'react'
 
-function Login({ user, setUser }) {
+function Login() {
   const navigate = useNavigate()
   const [phoneNumber, setPhoneNumber] = useState('')
   const [isValidPhoneNumber, setIsValidPhoneNumber] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  const [user, setUser] = useState()
+
+  useEffect(() => {
+    user && navigate('/home')
+  }, [user])
 
   const handlePhoneNumber = (e) => {
     let num = e.target.value
@@ -28,21 +35,7 @@ function Login({ user, setUser }) {
   }
 
   const handleLogin = async () => {
-    try {
-      const res = await axios.get(url.users + `/${phoneNumber}`)
-
-      if (res.data.status === 200) {
-        window.localStorage.setItem(
-          'USER_PHONE_NUMBER',
-          JSON.stringify(res.data.data.phoneNumber)
-        )
-        navigate('/home')
-      } else {
-        setErrorMessage(res.data.message)
-      }
-    } catch (err) {
-      console.log(err)
-    }
+    await getUserData(setUser)
   }
 
   const handleKeyPress = (e) => {

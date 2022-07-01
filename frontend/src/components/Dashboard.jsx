@@ -1,113 +1,24 @@
 import React from 'react'
-import gettingReadyImage from '../images/gettingready.png'
+// import gettingReadyImage from '../images/gettingready.png'
 import { Stack, Typography, Box } from '@mui/material'
 import * as V from 'victory'
 import CircleIcon from '@mui/icons-material/Circle'
 import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
 import { useState, useEffect } from 'react'
-import url from '../utils/urls'
+import urls from '../utils/urls'
 import removeTime from '../utils/removeTime'
-import formatDateToString from '../utils/formatDateToString'
+// import formatDateToString from '../utils/formatDateToString'
 import axios from 'axios'
 import {
+  formatDateToString,
   getSimpleMovingAverageArray,
   getEWMAArray,
   getMonday,
   isSameDay,
 } from '../utils/utilFunctions'
-
-// let data2 = [
-//   { x: '4/1/2022', y: 65.6 },
-//   { x: '4/2/2022', y: 65.6 },
-//   { x: '4/3/2022', y: 65.1 },
-//   { x: '4/4/2022', y: 64.7 },
-//   { x: '4/5/2022', y: 65.3 },
-//   { x: '4/6/2022', y: 64.7 },
-//   { x: '4/7/2022', y: 64.7 },
-//   { x: '4/8/2022', y: 65.2 },
-//   { x: '4/9/2022', y: 65.1 },
-//   { x: '4/10/2022', y: 65.2 },
-//   { x: '4/11/2022', y: 65.2 },
-//   { x: '4/12/2022', y: 64.2 },
-//   { x: '4/13/2022', y: 65 },
-//   { x: '4/14/2022', y: 65.9 },
-//   { x: '4/15/2022', y: 65.2 },
-//   { x: '4/16/2022', y: 65.4 },
-//   { x: '4/17/2022', y: 65 },
-//   { x: '4/18/2022', y: 64.6 },
-//   { x: '4/19/2022', y: 64.2 },
-//   { x: '4/20/2022', y: 64 },
-//   { x: '4/21/2022', y: 63.7 },
-//   { x: '4/22/2022', y: 63.9 },
-//   { x: '4/23/2022', y: 64.1 },
-//   { x: '4/24/2022', y: 64.1 },
-//   { x: '4/25/2022', y: 64.4 },
-//   { x: '4/26/2022', y: 64.4 },
-//   { x: '4/27/2022', y: 64.4 },
-//   { x: '4/28/2022', y: 64.1 },
-//   { x: '4/29/2022', y: 64.1 },
-//   { x: '4/30/2022', y: 64.6 },
-//   { x: '5/1/2022', y: 64.4 },
-//   { x: '5/2/2022', y: 64.2 },
-//   { x: '5/3/2022', y: 64.4 },
-//   { x: '5/4/2022', y: 64.1 },
-//   { x: '5/5/2022', y: 64.1 },
-//   { x: '5/6/2022', y: 64.3 },
-//   { x: '5/7/2022', y: 63.7 },
-//   { x: '5/8/2022', y: 63.55 },
-//   { x: '5/9/2022', y: 63.4 },
-//   { x: '5/10/2022', y: 63.5 },
-//   { x: '5/11/2022', y: 63.5 },
-//   { x: '5/12/2022', y: 63.8 },
-//   { x: '5/13/2022', y: 63.2 },
-//   { x: '5/14/2022', y: 63.4 },
-//   { x: '5/15/2022', y: 63.35 },
-//   { x: '5/16/2022', y: 63.3 },
-//   { x: '5/17/2022', y: 63 },
-//   { x: '5/18/2022', y: 63.2 },
-//   { x: '5/19/2022', y: 63 },
-//   { x: '5/20/2022', y: 63.5 },
-//   { x: '5/21/2022', y: 63.6 },
-//   { x: '5/22/2022', y: 63.7 },
-//   { x: '5/23/2022', y: 63.1 },
-//   { x: '5/24/2022', y: 62.8 },
-//   { x: '5/25/2022', y: 62.8 },
-//   { x: '5/26/2022', y: 62.6 },
-//   { x: '5/27/2022', y: 62.8 },
-//   { x: '5/28/2022', y: 62.9 },
-//   { x: '5/29/2022', y: 62.7 },
-//   { x: '5/30/2022', y: 62.5 },
-//   { x: '5/31/2022', y: 62.8 },
-//   { x: '6/1/2022', y: 62.8 },
-//   { x: '6/2/2022', y: 63 },
-//   { x: '6/3/2022', y: 62.7 },
-//   { x: '6/4/2022', y: 62.55 },
-//   { x: '6/5/2022', y: 62.55 },
-//   { x: '6/6/2022', y: 62.4 },
-//   { x: '6/7/2022', y: 62.7 },
-//   { x: '6/8/2022', y: 61.9 },
-//   { x: '6/9/2022', y: 63.5 },
-//   { x: '6/10/2022', y: 62.4 },
-//   { x: '6/11/2022', y: 63.5 },
-//   { x: '6/12/2022', y: 62.8 },
-//   { x: '6/13/2022', y: 62.1 },
-//   { x: '6/14/2022', y: 62.5 },
-//   { x: '6/15/2022', y: 62.8 },
-//   { x: '6/16/2022', y: 63 },
-//   { x: '6/17/2022', y: 63.2 },
-//   { x: '6/18/2022', y: 63.8 },
-//   { x: '6/19/2022', y: 62.6 },
-//   { x: '6/20/2022', y: 63.5 },
-// ]
-
-const makeDataDateObjects = (data) => {
-  return data.map((elem) => {
-    return {
-      x: new Date(elem.x),
-      y: elem.y,
-    }
-  })
-}
+import HabitColumn from './HabitColumn'
+import { getUserData } from '../apiCalls/getUserData'
+import fittinCoinImage from '../images/fittincoin.png'
 
 function Dashboard() {
   // data2 = makeDataDateObjects(data2)
@@ -116,6 +27,36 @@ function Dashboard() {
   const [habitTracker, setHabitTracker] = useState(0)
   const [averageWeightPlotData, setAverageWeightPlotData] = useState([])
   const [actualWeightPlotData, setActualWeightPlotData] = useState([])
+  const [user, setUser] = useState()
+  const [point, setPoint] = useState('')
+
+  // get user data on load
+  useEffect(() => {
+    getUserData(setUser)
+  }, [])
+
+  // when loaded, set relevant states
+  useEffect(() => {
+    if (user) {
+      let weights = user.weightLogs
+      setWeights(weights)
+
+      // setHabitTracker(drawHabitTracker(weights))
+      setHabitTracker(drawHabitTracker2(user.habitLogs))
+
+      // get the most recent weight
+      if (weights.length > 0) {
+        let recentWeight = weights[weights.length - 1].weight
+        let recentDate = weights[weights.length - 1].date
+        setRecentWeight({
+          weight: recentWeight,
+          date: new Date(recentDate),
+        })
+      }
+
+      setPoint(user.point)
+    }
+  }, [user])
 
   // make plot data for average and actual weights
   useEffect(() => {
@@ -144,10 +85,6 @@ function Dashboard() {
     setAverageWeightPlotData(newAverageWeightPlotData)
     setActualWeightPlotData(newActualWeightPlotData)
   }, [weights])
-
-  useEffect(() => {
-    getUserData()
-  }, [])
 
   const drawHabitTracker = (weightLogs) => {
     // find the monday of this week.
@@ -199,55 +136,70 @@ function Dashboard() {
 
     return habitTracker
   }
+  const drawHabitTracker2 = (habitLogs) => {
+    // find the monday of this week.
+    const monday = getMonday(new Date())
+    const oneDayInMiliseconds = 1000 * 60 * 60 * 24
+    const sunday = new Date(monday.getTime() + oneDayInMiliseconds * 6)
+    const today = removeTime(new Date()).getTime()
+    const thisWeekHabitLogs = habitLogs.map((elem) => {
+      if (new Date(elem.date) >= monday && new Date(elem.date) <= sunday)
+        return elem
+    })
 
-  const getUserData = async () => {
-    const phoneNumber = JSON.parse(
-      window.localStorage.getItem('USER_PHONE_NUMBER')
-    )
+    // console.log(thisWeekHabitLogs)
 
-    try {
-      const res = await axios.get(url.users + `/${phoneNumber}`, {
-        baseURL: '/',
+    const fontSize = 20
+    const habitTracker = [
+      <Stack key={0} height={137} justifyContent='space-around' mr={1}>
+        <Typography fontSize={fontSize}>📆</Typography>
+        <Typography fontSize={fontSize}>💪</Typography>
+        <Typography fontSize={fontSize}>🥣</Typography>
+      </Stack>,
+    ]
+
+    for (
+      let date = monday.getTime();
+      date <= sunday.getTime();
+      date += oneDayInMiliseconds
+    ) {
+      // up until today, search inside habitLogs for same date, and render by data (YES or NO)
+
+      // if not found, it is a failed day by default
+
+      let currentDateHabit = null
+
+      habitLogs.forEach((elem) => {
+        // if there is a match, set data to push to the elem.
+        if (isSameDay(elem.date, date)) {
+          currentDateHabit = elem
+        }
       })
 
-      if (res.data.status === 200) {
-        let user = res.data.data
-        console.log(user)
-        let weights = user.weightLogs
-        setWeights(weights)
-
-        setHabitTracker(drawHabitTracker(weights))
-        // let logArray = []
-        // for (let i = 1; i <= 7; i++) {
-        //   if (i <= weights.length)
-        //     logArray.push(
-        //       <CircleIcon key={i} sx={{ fontSize: 45, color: 'green' }} />
-        //     )
-        //   else {
-        //     logArray.push(
-        //       <CircleOutlinedIcon
-        //         key={i}
-        //         sx={{ fontSize: 45, color: 'black' }}
-        //       />
-        //     )
-        //   }
-        // }
-
-        // setLogCount(logArray)
-
-        // get the most recent weight data if available
-        if (weights.length > 0) {
-          let recentWeight = weights[weights.length - 1].weight
-          let recentDate = weights[weights.length - 1].date
-          setRecentWeight({
-            weight: recentWeight,
-            date: new Date(recentDate),
-          })
+      // if it doesn't exist, set it to default values
+      if (!currentDateHabit && date < today) {
+        // if before today, set to failed habit
+        currentDateHabit = {
+          date: new Date(date),
+          weigh: false,
+          diet: false,
+          exercise: false,
         }
       }
-    } catch (err) {
-      console.log(err)
+      // from today, set it current value or to blank habit
+      if (date >= today) {
+        currentDateHabit = {
+          date: new Date(date),
+          weigh: currentDateHabit?.weigh || 'blank',
+          diet: currentDateHabit?.diet || 'blank',
+          exercise: currentDateHabit?.exercise || 'blank',
+        }
+      }
+
+      // push one column of habit tracker
+      habitTracker.push(<HabitColumn currentDateHabit={currentDateHabit} />)
     }
+    return habitTracker
   }
 
   return (
@@ -259,8 +211,20 @@ function Dashboard() {
         </Typography> */}
         <Stack>
           <Typography variant='h1' textAlign='center' fontWeight={900}>
-            GOOD 💪
+            GOOD
           </Typography>
+          <Stack
+            direction={'row'}
+            justifyContent='end'
+            alignItems='center'
+            spacing={1}
+            mb={1}
+          >
+            <img width='30' src={fittinCoinImage} />
+            <Typography variant='h5' textAlign='right' fontWeight={900}>
+              {point}
+            </Typography>
+          </Stack>
 
           <Stack direction={'row'} justifyContent='center'>
             {habitTracker}
