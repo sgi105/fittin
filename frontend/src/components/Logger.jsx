@@ -342,7 +342,7 @@ function Logger() {
       <Stack mt={3} spacing={3}>
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <DatePicker
-            // disabled
+            disabled
             label='Date'
             value={date}
             inputFormat={'yyyy-MM-dd'}
