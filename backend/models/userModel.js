@@ -57,6 +57,7 @@ const pointSchema = mongoose.Schema(
 
 const userSchema = mongoose.Schema(
   {
+    active: Boolean,
     phoneNumber: String,
     name: String,
     gender: String,

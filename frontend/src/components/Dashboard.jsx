@@ -19,6 +19,15 @@ import {
 import HabitColumn from './HabitColumn'
 import { getUserData } from '../apiCalls/getUserData'
 import fittinCoinImage from '../images/fittincoin.png'
+import colors from '../utils/colors'
+const {
+  weightGoodHabitSquare,
+  weightSlowHabitSquare,
+  weightTooFastHabitSquare,
+  weightBadHabitSquare,
+  exerciseHabitSquare,
+  dietHabitSquare,
+} = colors
 
 function Dashboard() {
   // data2 = makeDataDateObjects(data2)
@@ -29,6 +38,7 @@ function Dashboard() {
   const [actualWeightPlotData, setActualWeightPlotData] = useState([])
   const [user, setUser] = useState()
   const [point, setPoint] = useState('')
+  const [weightChangeSpeed, setWeightChangeSpeed] = useState({})
 
   // get user data on load
   useEffect(() => {
@@ -55,6 +65,28 @@ function Dashboard() {
       }
 
       setPoint(user.point)
+
+      let color
+      let text = user.habitLogs[user.habitLogs.length - 1].weigh.toUpperCase()
+      switch (text) {
+        case 'GOOD':
+          color = weightGoodHabitSquare
+          break
+        case 'TOO FAST':
+          color = weightTooFastHabitSquare
+          break
+        case 'SLOW':
+          color = weightSlowHabitSquare
+          break
+        case 'BAD':
+          color = weightBadHabitSquare
+          break
+      }
+
+      setWeightChangeSpeed({
+        text,
+        color,
+      })
     }
   }, [user])
 
@@ -210,8 +242,13 @@ function Dashboard() {
           Goal: 9월 1일까지 67kg 까지 벌크업해서 풀빌라 파티 놀러간다
         </Typography> */}
         <Stack>
-          <Typography variant='h1' textAlign='center' fontWeight={900}>
-            GOOD
+          <Typography
+            color={weightChangeSpeed.color}
+            variant='h2'
+            textAlign='center'
+            fontWeight={900}
+          >
+            {weightChangeSpeed.text}
           </Typography>
           <Stack
             direction={'row'}
@@ -254,6 +291,20 @@ function Dashboard() {
             borderTop: 'solid 1px gray',
           }}
         >
+          <Typography mt={3} variant='h6' textAlign='center'>
+            Goal : {user?.goals[0]?.dietMode === 'gain' ? 'BULK' : 'DIET'}
+            {'  ' +
+              (
+                user?.goals[0]?.thisPlanTargetWeight -
+                user?.goals[0]?.startWeight
+              ).toFixed(1) +
+              'KG'}
+          </Typography>
+          <Typography textAlign='center'>
+            {user?.goals[0]?.startWeight + 'KG'}
+            {' → ' + user?.goals[0]?.thisPlanTargetWeight + 'KG'}
+          </Typography>
+
           <V.VictoryChart
             domainPadding={30}
             // domain={{ y: [minWeight, maxWeight] }}
@@ -285,7 +336,18 @@ function Dashboard() {
               style={{
                 data: {
                   // dot
-                  fill: 'gray',
+                  fill: ({ datum, index }) => {
+                    let dietMode = user.goals[0].dietMode
+                    if (dietMode === 'gain') {
+                      return averageWeightPlotData[index].y <= datum.y
+                        ? 'green'
+                        : 'red'
+                    } else {
+                      return averageWeightPlotData[index].y >= datum.y
+                        ? 'green'
+                        : 'red'
+                    }
+                  },
                   fillOpacity: 0.5,
                   // line
                   stroke: 'gray',

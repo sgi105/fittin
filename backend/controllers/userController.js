@@ -8,6 +8,7 @@ const {
   removeTime,
   getUserTimezoneTodayInUTC,
   upsertPointsArrayByDateAndDescription,
+  oneDayInMiliseconds,
 } = require('../utils')
 
 const createUser = asyncHandler(async (req, res) => {
@@ -236,10 +237,112 @@ const autoUpdateHabits = asyncHandler(async (req, res) => {
 // util 목적으로 코드 쓸 때 여기다가 실행시킬 함수를 가져오자.
 
 const runUtil = asyncHandler(async (req, res) => {
-  await updateHabitsAndPointsByWeightLog(req, res)
+  // await updateHabitsAndPointsByWeightLog(req, res)
+  await getHabitSuccessRatio(req, res)
+  // await makeAllUsersActive(req, res)
+  // await makeUsersNonActive(req, res)
 })
 
 // ======== UTILS ==========
+
+const makeAllUsersActive = async (req, res) => {
+  const users = await User.find()
+
+  users.forEach(async (user) => {
+    user.active = true
+    await user.save()
+  })
+
+  return res.status(200).json({
+    status: 200,
+    data: users,
+  })
+}
+
+const makeUsersNonActive = async (req, res) => {
+  const nonActiveNumbers = [
+    // '01048045448', // 민지선
+    '01025709952', // 박민철
+  ]
+
+  let result = []
+
+  nonActiveNumbers.forEach(async (phoneNumber) => {
+    const user = await User.findOne({ phoneNumber })
+    if (user) {
+      console.log('here1')
+      console.log(user.name)
+
+      user.active = false
+      result.push(1)
+      result.push(user.name)
+      console.log(result)
+      await user.save()
+    } else {
+      console.log('here2')
+      result.push(phoneNumber, 'not found')
+    }
+  })
+
+  console.log(result, 'here3')
+  console.log(nonActiveNumbers, 'here3')
+
+  res.status(200).json({
+    status: 200,
+    data: result,
+  })
+}
+
+const getHabitSuccessRatio = async (req, res) => {
+  // get all users
+  const users = await User.find({ active: true })
+
+  let habitStats = []
+
+  // count number of users
+  const numberOfUsers = users.length
+
+  users.forEach((user) => {
+    user.habitLogs.forEach((habit) => {
+      const i = habitStats.findIndex((stat) => {
+        return stat.date.getTime() === habit.date.getTime()
+      })
+
+      // found
+      if (i > -1) {
+        if (habit.weigh) habitStats[i].weigh++
+        if (habit.exercise) habitStats[i].exercise++
+        if (habit.diet) habitStats[i].diet++
+      }
+      // not found
+      else {
+        habitStats.push({
+          date: habit.date,
+          weigh: habit.weigh ? 1 : 0,
+          exercise: habit.exercise ? 1 : 0,
+          diet: habit.diet ? 1 : 0,
+        })
+      }
+    })
+  })
+
+  habitStats = habitStats.map((elem) => {
+    elem.ratio = elem.weigh / numberOfUsers
+    return elem
+  })
+
+  const totalHabitCount = habitStats.reduce((acc, elem) => {
+    return acc + elem.weigh
+  }, 0)
+
+  const totalHabitRatio = totalHabitCount / (habitStats.length * numberOfUsers)
+
+  res.status(200).json({
+    status: 200,
+    data: [{ total: numberOfUsers, totalHabitRatio }, habitStats],
+  })
+}
+
 const updateHabitsAndPointsByWeightLog = async (req, res) => {
   // get all users
   const users = await User.find({})

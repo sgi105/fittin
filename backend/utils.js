@@ -75,6 +75,8 @@ const getUserTimezoneTodayInUTC = (timezoneOffset) => {
   return UserTimezoneTodayInUTC
 }
 
+const oneDayInMiliseconds = 1000 * 24 * 60 * 60
+
 module.exports = {
   getDaysBetweenDates,
   formatDateToString,
@@ -82,4 +84,5 @@ module.exports = {
   removeTime,
   getUserTimezoneTodayInUTC,
   upsertPointsArrayByDateAndDescription,
+  oneDayInMiliseconds,
 }
