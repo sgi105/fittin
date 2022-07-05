@@ -15,7 +15,7 @@ const mainGreenAnalogous1 = '#88C926'
 const mainGreenAnalogous2 = '#26C99E'
 
 // weight related
-const googleThemeColorGreen = '#25a244'
+const googleThemeColorGreens = '#25a244'
 const googleThemeColorLightGreen = '#6ede8a'
 const googleThemeColorLighterGreen = '#B6EEC4'
 const googleThemeColorDarkerGreen = '#1F8739'
@@ -27,12 +27,12 @@ export default {
   // dietButton: 'rgba(81, 102, 252, .9)', // blue
 
   // habit squares
-  weightGoodHabitSquare: mainGreen,
-  weightSlowHabitSquare: lighterGreen,
-  weightTooFastHabitSquare: darkGreen,
-  weightBadHabitSquare: greenComplimentaryRed,
-  exerciseHabitSquare: mainGreen,
-  dietHabitSquare: mainGreen,
+  weightGoodHabitColor: mainGreen,
+  weightSlowHabitColor: lighterGreen,
+  weightTooFastHabitColor: darkGreen,
+  weightBadHabitColor: greenComplimentaryRed,
+  exerciseHabitColor: mainGreen,
+  dietHabitColor: mainGreen,
 
   // buttons
   exerciseButton: lightBlue,

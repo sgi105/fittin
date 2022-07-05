@@ -1,6 +1,6 @@
 import React from 'react'
 // import gettingReadyImage from '../images/gettingready.png'
-import { Stack, Typography, Box } from '@mui/material'
+import { Stack, Typography, Box, Grid } from '@mui/material'
 import * as V from 'victory'
 import CircleIcon from '@mui/icons-material/Circle'
 import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
@@ -20,13 +20,17 @@ import HabitColumn from './HabitColumn'
 import { getUserData } from '../apiCalls/getUserData'
 import fittinCoinImage from '../images/fittincoin.png'
 import colors from '../utils/colors'
+import ReactSpeedometer from 'react-d3-speedometer'
+
+import LinearProgress from '@mui/material/LinearProgress'
+
 const {
-  weightGoodHabitSquare,
-  weightSlowHabitSquare,
-  weightTooFastHabitSquare,
-  weightBadHabitSquare,
-  exerciseHabitSquare,
-  dietHabitSquare,
+  weightGoodHabitColor,
+  weightSlowHabitColor,
+  weightTooFastHabitColor,
+  weightBadHabitColor,
+  exerciseHabitColor,
+  dietHabitColor,
 } = colors
 
 function Dashboard() {
@@ -39,6 +43,9 @@ function Dashboard() {
   const [user, setUser] = useState()
   const [point, setPoint] = useState('')
   const [weightChangeSpeed, setWeightChangeSpeed] = useState({})
+  const [weightChangeRate, setWeightChangeRate] = useState(null)
+  const [progress, setProgress] = useState(0)
+  const [dietMode, setDietMode] = useState('')
 
   // get user data on load
   useEffect(() => {
@@ -70,16 +77,16 @@ function Dashboard() {
       let text = user.habitLogs[user.habitLogs.length - 1].weigh.toUpperCase()
       switch (text) {
         case 'GOOD':
-          color = weightGoodHabitSquare
+          color = weightGoodHabitColor
           break
         case 'TOO FAST':
-          color = weightTooFastHabitSquare
+          color = weightTooFastHabitColor
           break
         case 'SLOW':
-          color = weightSlowHabitSquare
+          color = weightSlowHabitColor
           break
         case 'BAD':
-          color = weightBadHabitSquare
+          color = weightBadHabitColor
           break
       }
 
@@ -87,6 +94,8 @@ function Dashboard() {
         text,
         color,
       })
+      setDietMode(user.goals[0].dietMode)
+      // setDietMode('lose')
     }
   }, [user])
 
@@ -102,7 +111,20 @@ function Dashboard() {
       return new Date(elem.date)
     })
 
-    const EWMAArray = getEWMAArray(weightValues, 0.9)
+    const EWMAArray = getEWMAArray(weightValues)
+
+    // calculate change rate/week : compare it to last week's EWMA
+    let rate = null
+
+    // only when there are more than 8 entries, you can calculate rate. until then, it is all good.
+    if (EWMAArray.length >= 8) {
+      rate =
+        (EWMAArray[EWMAArray.length - 1] - EWMAArray[EWMAArray.length - 8]) /
+        EWMAArray[EWMAArray.length - 8]
+    }
+
+    // set rate state
+    setWeightChangeRate(rate)
 
     const newAverageWeightPlotData = []
     const newActualWeightPlotData = []
@@ -117,6 +139,23 @@ function Dashboard() {
     setAverageWeightPlotData(newAverageWeightPlotData)
     setActualWeightPlotData(newActualWeightPlotData)
   }, [weights])
+
+  // setting progress weight
+  useEffect(() => {
+    console.log('setting progress')
+
+    setProgress(
+      Math.abs(
+        averageWeightPlotData[averageWeightPlotData?.length - 1]?.y -
+          user?.goals[0]?.startWeight
+      ) /
+        Math.abs(
+          user?.goals[0]?.thisPlanTargetWeight - user?.goals[0]?.startWeight
+        )
+    )
+
+    // setProgress(1.2)
+  }, [averageWeightPlotData, user])
 
   const drawHabitTracker = (weightLogs) => {
     // find the monday of this week.
@@ -237,139 +276,232 @@ function Dashboard() {
   return (
     <div>
       {/* <img src={gettingReadyImage} alt='getting ready' width={'100%'} /> */}
-      <Stack mt={3} spacing={5}>
+      <Stack spacing={1} alignItems='center'>
         {/* <Typography variant='body1' textAlign='center'>
           Goal: 9월 1일까지 67kg 까지 벌크업해서 풀빌라 파티 놀러간다
         </Typography> */}
-        <Stack>
-          <Typography
-            color={weightChangeSpeed.color}
-            variant='h2'
-            textAlign='center'
-            fontWeight={900}
-          >
-            {weightChangeSpeed.text}
+        <ReactSpeedometer
+          forceRender={true}
+          height={200}
+          // valueFormat='P'
+          needleHeightRatio={0.6}
+          minValue={-0.005}
+          maxValue={dietMode === 'gain' ? 0.01 : 0.015}
+          value={
+            dietMode === 'gain'
+              ? weightChangeRate > 0.01
+                ? 0.01
+                : weightChangeRate < -0.005
+                ? -0.005
+                : weightChangeRate
+              : -weightChangeRate > 0.015
+              ? 0.015
+              : -weightChangeRate < -0.005
+              ? -0.005
+              : -weightChangeRate
+          }
+          customSegmentStops={
+            dietMode === 'gain'
+              ? [-0.005, 0, 0.0025, 0.005, 0.01]
+              : [-0.005, 0, 0.005, 0.01, 0.015]
+          }
+          segmentColors={[
+            weightBadHabitColor,
+            weightSlowHabitColor,
+            weightGoodHabitColor,
+            weightTooFastHabitColor,
+          ]}
+          currentValueText={
+            'WEEKLY CHANGE: ' +
+            (weightChangeRate >= 0 ? '+' : '') +
+            (weightChangeRate * 100).toFixed(2) +
+            '%'
+          }
+          customSegmentLabels={[
+            {
+              text: 'Bad',
+              position: 'OUTSIDE',
+              color: 'black',
+            },
+            {
+              text: 'Slow',
+              position: 'OUTSIDE',
+              color: 'black',
+            },
+            {
+              text: 'Good',
+              position: 'OUTSIDE',
+              color: 'black',
+            },
+            {
+              text: 'Too Fast',
+              position: 'OUTSIDE',
+              color: 'black',
+            },
+          ]}
+          ringWidth={47}
+          needleTransitionDuration={5000}
+          needleTransition='easeElastic'
+          needleColor={'black'}
+          textColor={'black'}
+        />
+        {/* <Typography
+          color={weightChangeSpeed.color}
+          variant='h5'
+          textAlign='center'
+          fontWeight={900}
+        >
+          {weightChangeSpeed.text}
+        </Typography> */}
+        <Stack
+          width='100%'
+          direction={'row'}
+          justifyContent='end'
+          alignItems='center'
+          spacing={1}
+          mb={1}
+        >
+          <img width='30' src={fittinCoinImage} />
+          <Typography variant='h5' textAlign='right' fontWeight={900}>
+            {point}
           </Typography>
-          <Stack
-            direction={'row'}
-            justifyContent='end'
-            alignItems='center'
-            spacing={1}
-            mb={1}
-          >
-            <img width='30' src={fittinCoinImage} />
-            <Typography variant='h5' textAlign='right' fontWeight={900}>
-              {point}
-            </Typography>
-          </Stack>
-
-          <Stack direction={'row'} justifyContent='center'>
-            {habitTracker}
-          </Stack>
-
-          {/* <Typography variant='h5' textAlign='center'>
-            GOOD × 3
-          </Typography>
-          <Typography variant='h1' textAlign='center' fontWeight={900}>
-            -0.2%
-          </Typography>
-          <Typography mt={-2} mb={2} variant='subtitle2' textAlign='center'>
-            (-0.1KG)
-          </Typography>
-          <Typography variant='h5' textAlign='center'>
-            62.5KG
-          </Typography> */}
         </Stack>
-        {recentWeight.weight && (
-          <Typography variant='caption' textAlign='right' color='gray'>
-            {recentWeight.weight.toFixed(1)}KG (
-            {formatDateToString(recentWeight.date)})
-          </Typography>
-        )}
+
+        <Stack direction={'row'} justifyContent='center'>
+          {habitTracker}
+        </Stack>
+
         <Box
           sx={{
             borderTop: 'solid 1px gray',
           }}
         >
-          <Typography mt={3} variant='h6' textAlign='center'>
-            Goal : {user?.goals[0]?.dietMode === 'gain' ? 'BULK' : 'DIET'}
-            {'  ' +
-              (
-                user?.goals[0]?.thisPlanTargetWeight -
-                user?.goals[0]?.startWeight
-              ).toFixed(1) +
-              'KG'}
-          </Typography>
-          <Typography textAlign='center'>
-            {user?.goals[0]?.startWeight + 'KG'}
-            {' → ' + user?.goals[0]?.thisPlanTargetWeight + 'KG'}
-          </Typography>
+          <Stack spacing={1} pt={2}>
+            <Stack spacing={1}>
+              <Typography variant='h5' textAlign='center'>
+                🎯 {user?.goals[0]?.dietMode === 'gain' ? 'BULK' : 'DIET'}
+                {'  ' +
+                  (
+                    user?.goals[0]?.thisPlanTargetWeight -
+                    user?.goals[0]?.startWeight
+                  ).toFixed(1) +
+                  'KG'}
+              </Typography>
+              <Stack spacing={1}>
+                <Stack
+                  spacing={0.5}
+                  alignItems='center'
+                  justifyContent='center'
+                >
+                  <LinearProgress
+                    variant='determinate'
+                    value={progress * 100 > 100 ? 100 : progress * 100}
+                    sx={{
+                      backgroundColor: weightSlowHabitColor,
+                      height: 20,
+                      width: '100%',
+                      borderRadius: 2,
+                      '& .MuiLinearProgress-bar': {
+                        backgroundColor: weightGoodHabitColor,
+                      },
+                    }}
+                  />
+                  <Typography
+                    color='black'
+                    variant='caption'
+                    textAlign='center'
+                    sx={{
+                      fontWeight: 'bold',
+                      position: 'absolute',
+                      zIndex: 1,
+                    }}
+                  >
+                    {(progress * 100).toFixed(2)}%
+                  </Typography>
+                </Stack>
+                <Stack direction='row' justifyContent='space-between'>
+                  <Typography color='gray' variant='caption' textAlign='center'>
+                    {user?.goals[0]?.startWeight + 'KG'}
+                  </Typography>
+                  <Typography variant='body' textAlign='center'>
+                    {averageWeightPlotData[
+                      averageWeightPlotData?.length - 1
+                    ]?.y.toFixed(2)}
+                    KG
+                  </Typography>
+                  <Typography color='gray' variant='caption' textAlign='center'>
+                    {user?.goals[0]?.thisPlanTargetWeight + 'KG'}
+                  </Typography>
+                </Stack>
+              </Stack>
+            </Stack>
 
-          <V.VictoryChart
-            domainPadding={30}
-            // domain={{ y: [minWeight, maxWeight] }}
-            scale={{ x: 'time', y: 'linear' }}
-            containerComponent={<V.VictoryZoomContainer zoomDimension='x' />}
-          >
-            <V.VictoryAxis
-              tickFormat={(x) =>
-                x.toLocaleDateString(undefined, {
-                  day: '2-digit',
-                  month: '2-digit',
-                  // year: 'numeric',
-                })
-              }
-            />
-            <V.VictoryAxis dependentAxis />
-            <V.VictoryLine
-              style={{
-                data: {
-                  stroke: 'black',
-                  strokeOpacity: 1,
-                  strokeWidth: 3,
-                },
-              }}
-              data={averageWeightPlotData}
-              interpolation='natural'
-            />
-            <V.VictoryGroup
-              style={{
-                data: {
-                  // dot
-                  fill: ({ datum, index }) => {
-                    let dietMode = user.goals[0].dietMode
-                    if (dietMode === 'gain') {
-                      return averageWeightPlotData[index].y <= datum.y
-                        ? 'green'
-                        : 'red'
-                    } else {
-                      return averageWeightPlotData[index].y >= datum.y
-                        ? 'green'
-                        : 'red'
-                    }
-                  },
-                  fillOpacity: 0.5,
-                  // line
-                  stroke: 'gray',
-                  strokeOpacity: 0.5,
-                  strokeWidth: 1,
-                },
-              }}
-              data={actualWeightPlotData}
+            <V.VictoryChart
+              domainPadding={30}
+              // domain={{ y: [minWeight, maxWeight] }}
+              scale={{ x: 'time', y: 'linear' }}
+              containerComponent={<V.VictoryZoomContainer zoomDimension='x' />}
             >
-              {/* <V.VictoryLine /> */}
-              <V.VictoryScatter
-                size={5}
-                labels={({ datum }) =>
-                  `${formatDateToString(datum.x)}
-                  ${datum.y.toFixed(2)}KG`
-                }
-                labelComponent={
-                  <V.VictoryTooltip dy={0} centerOffset={{ x: 25 }} />
+              <V.VictoryAxis
+                tickFormat={(x) =>
+                  x.toLocaleDateString(undefined, {
+                    day: '2-digit',
+                    month: '2-digit',
+                    // year: 'numeric',
+                  })
                 }
               />
-            </V.VictoryGroup>
-          </V.VictoryChart>
+              <V.VictoryAxis dependentAxis />
+              <V.VictoryLine
+                style={{
+                  data: {
+                    stroke: 'black',
+                    strokeOpacity: 1,
+                    strokeWidth: 3,
+                  },
+                }}
+                data={averageWeightPlotData}
+                interpolation='natural'
+              />
+              <V.VictoryGroup
+                style={{
+                  data: {
+                    // dot
+                    fill: ({ datum, index }) => {
+                      let dietMode = user.goals[0].dietMode
+                      if (dietMode === 'gain') {
+                        return averageWeightPlotData[index].y <= datum.y
+                          ? 'green'
+                          : 'red'
+                      } else {
+                        return averageWeightPlotData[index].y >= datum.y
+                          ? 'green'
+                          : 'red'
+                      }
+                    },
+                    fillOpacity: 0.5,
+                    // line
+                    stroke: 'gray',
+                    strokeOpacity: 0.5,
+                    strokeWidth: 1,
+                  },
+                }}
+                data={actualWeightPlotData}
+              >
+                {/* <V.VictoryLine /> */}
+                <V.VictoryScatter
+                  size={5}
+                  labels={({ datum }) =>
+                    `${formatDateToString(datum.x)}
+                  ${datum.y.toFixed(2)}KG`
+                  }
+                  labelComponent={
+                    <V.VictoryTooltip dy={0} centerOffset={{ x: 25 }} />
+                  }
+                />
+              </V.VictoryGroup>
+            </V.VictoryChart>
+          </Stack>
         </Box>
       </Stack>
     </div>

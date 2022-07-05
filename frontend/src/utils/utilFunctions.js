@@ -25,7 +25,7 @@ const getSimpleMovingAverageArray = (array, lookbackDays) => {
   return simpleAverageArray
 }
 
-const getEWMAArray = (array, smoothingConstant) => {
+const getEWMAArray = (array, smoothingConstant = 0.9) => {
   // const lookbackdays = 1 / (1 - smoothingConstant)
 
   const EWMAArray = []

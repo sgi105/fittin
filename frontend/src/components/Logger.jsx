@@ -255,7 +255,7 @@ function Logger() {
     console.log(weightValues)
 
     // get EWMAArray and calculate weight score
-    const EWMAArray = getEWMAArray(weightValues, 0.9)
+    const EWMAArray = getEWMAArray(weightValues)
     console.log(EWMAArray)
 
     // calculate change rate/week : compare it to last week's EWMA

@@ -3,12 +3,12 @@ import { Box, Typography, Stack } from '@mui/material'
 import { formatDateToString } from '../utils/utilFunctions'
 import colors from '../utils/colors'
 const {
-  weightGoodHabitSquare,
-  weightSlowHabitSquare,
-  weightTooFastHabitSquare,
-  weightBadHabitSquare,
-  exerciseHabitSquare,
-  dietHabitSquare,
+  weightGoodHabitColor,
+  weightSlowHabitColor,
+  weightTooFastHabitColor,
+  weightBadHabitColor,
+  exerciseHabitColor,
+  dietHabitColor,
 } = colors
 
 function HabitBox({ name, state = false }) {
@@ -28,12 +28,12 @@ function HabitBox({ name, state = false }) {
   else if (state === 'blank') color = blankColor
   else {
     if (name === 'weigh') {
-      if (state === 'good') color = weightGoodHabitSquare
-      else if (state === 'slow') color = weightSlowHabitSquare
-      else if (state === 'too fast') color = weightTooFastHabitSquare
-      else color = weightBadHabitSquare
-    } else if (name === 'exercise') color = exerciseHabitSquare
-    else color = dietHabitSquare
+      if (state === 'good') color = weightGoodHabitColor
+      else if (state === 'slow') color = weightSlowHabitColor
+      else if (state === 'too fast') color = weightTooFastHabitColor
+      else color = weightBadHabitColor
+    } else if (name === 'exercise') color = exerciseHabitColor
+    else color = dietHabitColor
   }
 
   let size = '45px'
