@@ -43,7 +43,7 @@ function Dashboard() {
   const [user, setUser] = useState()
   const [point, setPoint] = useState('')
   const [weightChangeSpeed, setWeightChangeSpeed] = useState({})
-  const [weightChangeRate, setWeightChangeRate] = useState(null)
+  const [weightChangeRate, setWeightChangeRate] = useState(0)
   const [progress, setProgress] = useState(0)
   const [dietMode, setDietMode] = useState('')
 
@@ -290,7 +290,8 @@ function Dashboard() {
         </Typography>
         <ReactSpeedometer
           forceRender={true}
-          height={200}
+          height={160}
+          width={270}
           // valueFormat='P'
           needleHeightRatio={0.6}
           minValue={-0.005}
