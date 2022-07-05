@@ -280,6 +280,14 @@ function Dashboard() {
         {/* <Typography variant='body1' textAlign='center'>
           Goal: 9월 1일까지 67kg 까지 벌크업해서 풀빌라 파티 놀러간다
         </Typography> */}
+        <Typography
+          color={weightChangeSpeed.color}
+          variant='h4'
+          textAlign='center'
+          fontWeight={900}
+        >
+          {weightChangeSpeed.text}
+        </Typography>
         <ReactSpeedometer
           forceRender={true}
           height={200}
@@ -345,14 +353,7 @@ function Dashboard() {
           needleColor={'black'}
           textColor={'black'}
         />
-        {/* <Typography
-          color={weightChangeSpeed.color}
-          variant='h5'
-          textAlign='center'
-          fontWeight={900}
-        >
-          {weightChangeSpeed.text}
-        </Typography> */}
+
         <Stack
           width='100%'
           direction={'row'}
