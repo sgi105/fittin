@@ -35,11 +35,14 @@ import Snackbar from '@mui/material/Snackbar'
 import IconButton from '@mui/material/IconButton'
 import CloseIcon from '@mui/icons-material/Close'
 import { getUserData } from '../apiCalls/getUserData'
+import { useNavigate, Navigate } from 'react-router-dom'
 
 function Profile() {
+  const navigate = useNavigate()
+
   // user basic profile states
-  const [name, setName] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
+  const [name, setName] = useState('')
   const [gender, setGender] = useState('')
   const [birthday, setBirthday] = useState(null)
   const [height, setHeight] = useState('')
@@ -70,15 +73,24 @@ function Profile() {
 
   const open = Boolean(anchorEl)
 
+  // set user login data from local storage. if not logged in go to login page
   useEffect(() => {
-    getUserData(setUser)
+    const phoneNumber = JSON.parse(
+      window.localStorage.getItem('USER_PHONE_NUMBER')
+    )
+    if (phoneNumber) setPhoneNumber(phoneNumber)
+    else navigate('/')
   }, [])
+
+  useEffect(() => {
+    getUserData(phoneNumber, setUser)
+  }, [phoneNumber])
 
   useEffect(() => {
     if (user) {
       console.log(user)
       setName(user.name)
-      setPhoneNumber(user.phoneNumber)
+      // setPhoneNumber(user.phoneNumber)
       setGender(user.gender)
       setBirthday(user.birthday)
       setHeight(user.height)
@@ -245,6 +257,11 @@ function Profile() {
     setOpenSaveSuccessSnackBar(false)
   }
 
+  const handleLogout = () => {
+    window.localStorage.setItem('USER_PHONE_NUMBER', JSON.stringify(''))
+    navigate('/')
+  }
+
   const action = (
     <React.Fragment>
       <IconButton
@@ -264,9 +281,12 @@ function Profile() {
         <Typography variant='h3' fontWeight='bold'>
           Profile
         </Typography>
-        <Typography variant='h5' fontWeight='normal'>
-          Basic
-        </Typography>
+        <Stack direction='row' justifyContent='space-between'>
+          <Typography variant='h5' fontWeight='normal'>
+            Basic
+          </Typography>
+          <Button onClick={handleLogout}>Log out</Button>
+        </Stack>
         <TextField label='Name' value={name} variant='standard' disabled />
         <TextField
           label='Phone'

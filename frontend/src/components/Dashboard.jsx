@@ -23,6 +23,7 @@ import colors from '../utils/colors'
 import ReactSpeedometer from 'react-d3-speedometer'
 
 import LinearProgress from '@mui/material/LinearProgress'
+import { useNavigate, Navigate } from 'react-router-dom'
 
 const {
   weightGoodHabitColor,
@@ -34,7 +35,9 @@ const {
 } = colors
 
 function Dashboard() {
-  // data2 = makeDataDateObjects(data2)
+  const navigate = useNavigate()
+
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [weights, setWeights] = useState([])
   const [recentWeight, setRecentWeight] = useState({})
   const [habitTracker, setHabitTracker] = useState(0)
@@ -47,10 +50,19 @@ function Dashboard() {
   const [progress, setProgress] = useState(0)
   const [dietMode, setDietMode] = useState('')
 
+  // set user login data from local storage. if not logged in go to login page
+  useEffect(() => {
+    const phoneNumber = JSON.parse(
+      window.localStorage.getItem('USER_PHONE_NUMBER')
+    )
+    if (phoneNumber) setPhoneNumber(phoneNumber)
+    else navigate('/')
+  }, [])
+
   // get user data on load
   useEffect(() => {
-    getUserData(setUser)
-  }, [])
+    getUserData(phoneNumber, setUser)
+  }, [phoneNumber])
 
   // when loaded, set relevant states
   useEffect(() => {

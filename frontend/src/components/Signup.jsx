@@ -83,6 +83,11 @@ function Signup() {
       })
 
       if (res.data.status === 200) {
+        // save user login data in local storage
+        window.localStorage.setItem(
+          'USER_PHONE_NUMBER',
+          JSON.stringify(phoneNumber)
+        )
         navigate('/')
       } else {
         setErrorMessage(res.data.message)

@@ -1,4 +1,12 @@
-import { Container, Stack, TextField, Typography, Button } from '@mui/material'
+import {
+  Container,
+  Stack,
+  TextField,
+  Typography,
+  Button,
+  CircularProgress,
+  Backdrop,
+} from '@mui/material'
 import sloganImage from '../images/slogan.jpeg'
 import { useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
@@ -13,10 +21,46 @@ function Login() {
   const [isValidPhoneNumber, setIsValidPhoneNumber] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [user, setUser] = useState()
+  const [isLoading, setIsLoading] = useState(false)
+  const [isAutoLogin, setIsAutoLogin] = useState(false)
 
   useEffect(() => {
-    user && navigate('/home')
+    if (user) {
+      window.localStorage.setItem(
+        'USER_PHONE_NUMBER',
+        JSON.stringify(phoneNumber)
+      )
+      setIsLoading(true)
+      setTimeout(() => {
+        setIsLoading(false)
+        navigate('/home')
+      }, 500)
+    }
   }, [user])
+
+  // check if user is already logged in
+  useEffect(() => {
+    let phoneNumber = window.localStorage.getItem('USER_PHONE_NUMBER')
+    if (phoneNumber) {
+      phoneNumber = JSON.parse(phoneNumber)
+      if (phoneNumber) {
+        setPhoneNumber(phoneNumber)
+        setIsAutoLogin(true)
+      }
+    }
+  }, [])
+
+  // check for valid phoneNumber and try logging in
+  useEffect(() => {
+    if (phoneNumber)
+      handlePhoneNumber({
+        target: { value: phoneNumber },
+      })
+
+    if (isValidPhoneNumber && isAutoLogin) {
+      handleLogin()
+    }
+  }, [phoneNumber, isValidPhoneNumber, isAutoLogin])
 
   const handlePhoneNumber = (e) => {
     let num = e.target.value
@@ -35,7 +79,7 @@ function Login() {
   }
 
   const handleLogin = async () => {
-    await getUserData(setUser)
+    await getUserData(phoneNumber, setUser)
   }
 
   const handleKeyPress = (e) => {
@@ -44,6 +88,9 @@ function Login() {
 
   return (
     <Container>
+      <Backdrop open={isLoading}>
+        <CircularProgress />
+      </Backdrop>
       <Stack
         spacing={5}
         justifyContent='center'

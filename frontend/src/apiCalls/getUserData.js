@@ -1,11 +1,8 @@
 import axios from 'axios'
 import urls from '../utils/urls'
 
-const getUserData = async (setUser) => {
+const getUserData = async (phoneNumber, setUser) => {
   const timezoneOffset = new Date().getTimezoneOffset()
-  const phoneNumber = JSON.parse(
-    window.localStorage.getItem('USER_PHONE_NUMBER')
-  )
 
   try {
     const res = await axios.post(

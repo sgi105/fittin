@@ -1,4 +1,11 @@
-import { Button, Container, Stack, Typography } from '@mui/material'
+import {
+  Button,
+  Container,
+  Stack,
+  Typography,
+  Snackbar,
+  Box,
+} from '@mui/material'
 import React from 'react'
 import { useState, useEffect } from 'react'
 import TextField from '@mui/material/TextField'
@@ -20,12 +27,16 @@ import { getUserData } from '../apiCalls/getUserData'
 // toggle button
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
+import IconButton from '@mui/material/IconButton'
+import CloseIcon from '@mui/icons-material/Close'
 import colors from '../utils/colors'
-
-const phoneNumber = JSON.parse(window.localStorage.getItem('USER_PHONE_NUMBER'))
+const { weightGoodHabitColor } = colors
 
 function Logger() {
   const navigate = useNavigate()
+
+  // login data
+  const [phoneNumber, setPhoneNumber] = useState('')
 
   // inputs
   const [date, setDate] = useState(removeTime(new Date()))
@@ -50,10 +61,20 @@ function Logger() {
     borderRadius: '4px',
     height: '300px',
   })
+  const [openLoginSnackBar, setOpenLoginSnackBar] = useState(false)
 
-  const handleHabits = (event, newHabits) => {
-    setHabits(newHabits)
-  }
+  // set user login data from local storage. if not logged in go to login page
+  useEffect(() => {
+    const phoneNumber = JSON.parse(
+      window.localStorage.getItem('USER_PHONE_NUMBER')
+    )
+    if (phoneNumber) setPhoneNumber(phoneNumber)
+    else navigate('/')
+  }, [])
+
+  useEffect(() => {
+    getUserData(phoneNumber, setUser)
+  }, [phoneNumber])
 
   useEffect(() => {
     if (weight > 0) setShowButton(true)
@@ -64,10 +85,6 @@ function Logger() {
     loadSelectedDateWeight(weights)
     loadSelectedDateHabitLog(habitLogs)
   }, [date])
-
-  useEffect(() => {
-    getUserData(setUser)
-  }, [])
 
   useEffect(() => {
     if (user) {
@@ -92,6 +109,9 @@ function Logger() {
       if (user.habitLogs.length > 0) {
         const selectedDateHabitLog = loadSelectedDateHabitLog(newHabitLogs)
       }
+
+      // open login success snackbar
+      setOpenLoginSnackBar(true)
     }
   }, [user])
 
@@ -130,6 +150,31 @@ function Logger() {
   //     console.log(err)
   //   }
   // }
+
+  const handleCloseSnackBar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return
+    }
+
+    setOpenLoginSnackBar(false)
+  }
+
+  const action = (
+    <Box>
+      <IconButton
+        size='small'
+        aria-label='close'
+        color='inherit'
+        onClick={handleCloseSnackBar}
+      >
+        <CloseIcon fontSize='small' />
+      </IconButton>
+    </Box>
+  )
+
+  const handleHabits = (event, newHabits) => {
+    setHabits(newHabits)
+  }
 
   const loadSelectedDateHabitLog = (habitLogs) => {
     let selectedDateHabitLog = false
@@ -448,6 +493,20 @@ function Logger() {
         question='이미 기록이 있다. 덮어쓸것인가?'
         yesText='네'
         noText='취소'
+      />
+      <Snackbar
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        open={openLoginSnackBar}
+        autoHideDuration={1000}
+        onClose={handleCloseSnackBar}
+        message={`Welcome, ${user?.name}`}
+        action={action}
+        sx={{
+          '& .MuiSnackbarContent-root': {
+            backgroundColor: weightGoodHabitColor,
+            color: 'black',
+          },
+        }}
       />
     </Container>
   )
