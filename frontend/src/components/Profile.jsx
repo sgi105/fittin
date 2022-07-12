@@ -36,6 +36,7 @@ import IconButton from '@mui/material/IconButton'
 import CloseIcon from '@mui/icons-material/Close'
 import { getUserData } from '../apiCalls/getUserData'
 import { useNavigate, Navigate } from 'react-router-dom'
+import { formatDateToString } from '../utils/utilFunctions'
 
 function Profile() {
   const navigate = useNavigate()
@@ -67,6 +68,7 @@ function Profile() {
   const [thisPlanAchieveDate, setThisPlanAchieveDate] = useState()
   const [reasonForDiet, setReasonForDiet] = useState('')
   const [rewardAfterDiet, setRewardAfterDiet] = useState('')
+  const [dietPlanText, setDietPlanText] = useState('')
 
   // graph data
   const [weightLossPlanData, setWeightLossPlanData] = useState([])
@@ -153,7 +155,6 @@ function Profile() {
     startBodyFat,
     targetBodyFat,
     startDate,
-    endDate,
   ])
 
   useEffect(() => {
@@ -163,20 +164,24 @@ function Profile() {
   }, [rewardAfterDiet, reasonForDiet])
 
   const createGraph = () => {
-    // create array that has projection for future weight
+    // create array that has projection for future weight when end date is determined
     const days = (date_1, date_2) => {
       let difference = date_1.getTime() - date_2.getTime()
       let TotalDays = Math.ceil(difference / (1000 * 3600 * 24))
       return TotalDays
     }
 
-    const dietPlanDuration = days(endDate, startDate) + 1
+    let dietPlanDuration = days(endDate, startDate) + 1
 
     let oneDay = 1000 * 3600 * 24
 
     let newData = []
-    console.log(dietSpeed)
 
+    // calculate exact date
+    let targetAchieved = false
+
+    // after getting rid of 3 month cap: make dietPlanDuration infinite
+    dietPlanDuration = 1000000
     for (let i = 0; i < dietPlanDuration; i++) {
       let date = startDate.getTime() + oneDay * i
       let newWeight = startWeight * Math.pow(Math.pow(1 + dietSpeed, 1 / 7), i)
@@ -189,18 +194,79 @@ function Profile() {
         (dietMode === 'gain' && newWeight >= targetWeight)
       ) {
         newWeight = targetWeight
+        targetAchieved = true
       }
 
-      // when weight changes, update the achieve date.
-      if (i === 0) setThisPlanAchieveDate(new Date(date))
-      if (i > 0 && newData[newData.length - 1].y !== newWeight)
-        setThisPlanAchieveDate(new Date(date))
-
+      // push new data
       newData.push({ x: new Date(date), y: newWeight })
+
+      // if targetWeight is achieved,
+      // need to break out of the loop.
+      if (targetAchieved) {
+        // count the remainder by dividing total days by 7.
+        let remainder = 7 - ((i + 1) % 7)
+
+        // add days so that it makes a full week.
+        for (let j = 0; j < remainder; j++) {
+          date = date + oneDay
+          newData.push({ x: new Date(date), y: newWeight })
+        }
+        break
+      }
     }
+
+    // set the graph plot data
     setWeightLossPlanData(newData)
 
-    setThisPlanTargetWeight(newData[newData.length - 1].y.toFixed(1))
+    // set this plan's target weight and date
+
+    // setThisPlanTargetWeight(newData[newData.length - 1].y.toFixed(1)) // 최종 목표
+
+    if (newData[28]?.y) {
+      setThisPlanTargetWeight(newData[28].y.toFixed(1)) // 한달 목표
+    }
+    setThisPlanAchieveDate(newData[newData.length - 1].x)
+
+    console.log(newData)
+
+    // calculate end date by adding diet breaks, and diet after bulk
+    let dietDurationInWeeks = newData.length / 7
+    let additionalDietDurationInWeeks
+    console.log(dietDurationInWeeks)
+
+    if (dietMode === 'lose') {
+      additionalDietDurationInWeeks = Math.floor(dietDurationInWeeks / 12) * 2
+    }
+
+    if (dietMode === 'gain') {
+      additionalDietDurationInWeeks = Math.round(dietDurationInWeeks / 3)
+    }
+
+    const totalDietDurationInWeeks =
+      dietDurationInWeeks + additionalDietDurationInWeeks
+
+    console.log(totalDietDurationInWeeks)
+
+    // set end date
+    let endDateIncludingAdditionalWeeks = new Date(
+      newData[newData.length - 1].x.getTime() +
+        oneDay * 7 * additionalDietDurationInWeeks
+    )
+    setEndDate(removeTime(endDateIncludingAdditionalWeeks))
+
+    // set text
+
+    let dietPlanText = ''
+
+    // 다이어트 텍스트
+    if (dietMode === 'lose')
+      dietPlanText = `총 ${totalDietDurationInWeeks}주 (중간에 유지어트 ${additionalDietDurationInWeeks}주)`
+
+    // 벌크 텍스트
+    if (dietMode === 'gain')
+      dietPlanText = `총 ${totalDietDurationInWeeks}주. 벌크 ${dietDurationInWeeks}주 + 커팅 ${additionalDietDurationInWeeks}주`
+
+    setDietPlanText(dietPlanText)
   }
 
   const dateObjectToString = (date) => {
@@ -276,85 +342,12 @@ function Profile() {
   )
 
   return (
-    <>
-      <Stack spacing={4} px={2} mx='auto'>
-        <Typography variant='h3' fontWeight='bold'>
-          Profile
-        </Typography>
-        <Stack direction='row' justifyContent='space-between'>
-          <Typography variant='h5' fontWeight='normal'>
-            Basic
-          </Typography>
-          <Button onClick={handleLogout}>Log out</Button>
-        </Stack>
-        <TextField label='Name' value={name} variant='standard' disabled />
-        <TextField
-          label='Phone'
-          value={phoneNumber}
-          variant='standard'
-          disabled
-        />
-        <FormControl fullWidth>
-          <FormLabel id='demo-radio-buttons-group-label'>Gender</FormLabel>
-          <RadioGroup
-            aria-labelledby='demo-radio-buttons-group-label'
-            name='radio-buttons-group'
-            onChange={(e) => {
-              setGender(e.target.value)
-            }}
-            value={gender}
-          >
-            <FormControlLabel
-              disabled
-              value='female'
-              control={<Radio />}
-              label='Female 🙋🏻‍♀️'
-            />
-            <FormControlLabel
-              disabled
-              value='male'
-              control={<Radio />}
-              label='Male 🙋🏻‍♂️'
-            />
-          </RadioGroup>
-        </FormControl>
+    <Stack spacing={4} px={2} mx='auto'>
+      <Typography variant='h3' fontWeight='bold'>
+        Profile
+      </Typography>
 
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <DatePicker
-            inputFormat={'yyyy-MM-dd'}
-            mask={'____-__-__'}
-            disabled
-            openTo='year'
-            views={['year', 'month', 'day']}
-            label='Birthday'
-            value={birthday}
-            onChange={(newValue) => {
-              setBirthday(newValue)
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                helperText={null}
-                fullWidth
-                variant='standard'
-              />
-            )}
-          />
-        </LocalizationProvider>
-        <TextField
-          disabled
-          value={height}
-          fullWidth
-          label='Height'
-          InputProps={{
-            endAdornment: <InputAdornment position='end'>CM</InputAdornment>,
-            inputMode: 'numeric',
-          }}
-          type='number'
-          variant='standard'
-          placeholder='165'
-        />
-
+      <Stack spacing={3} id='plan-section'>
         <Typography pt={2} variant='h5'>
           Plan
         </Typography>
@@ -369,19 +362,6 @@ function Profile() {
               value={startDate}
               onChange={(newValue) => {
                 setStartDate(removeTime(newValue))
-              }}
-              renderInput={(params) => (
-                <TextField {...params} helperText={null} variant='standard' />
-              )}
-            />
-            <DatePicker
-              disabled
-              inputFormat={'yyyy-MM-dd'}
-              mask={'____-__-__'}
-              label='End Date'
-              value={endDate}
-              onChange={(newValue) => {
-                setEndDate(removeTime(newValue))
               }}
               renderInput={(params) => (
                 <TextField {...params} helperText={null} variant='standard' />
@@ -646,20 +626,44 @@ function Profile() {
           {showGraph && (
             <>
               {targetWeight && (
-                <Stack direction='row' alignItems='end'>
-                  <Typography pt={1} variant='body2' color='gray'>
-                    최종 목표:{' '}
-                    {targetWeight >= startWeight
-                      ? '+' + (targetWeight - startWeight).toFixed(1)
-                      : (targetWeight - startWeight).toFixed(1)}{' '}
-                    KG
-                  </Typography>
-                  <Typography color='gray' variant='body2' ml={1}>
-                    ({startWeight} KG → {targetWeight} KG)
-                  </Typography>
-                </Stack>
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <DatePicker
+                    disabled
+                    inputFormat={'yyyy-MM-dd'}
+                    mask={'____-__-__'}
+                    label='End Date'
+                    value={endDate}
+                    onChange={(newValue) => {
+                      setEndDate(removeTime(newValue))
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        helperText={null}
+                        variant='standard'
+                      />
+                    )}
+                  />
+                  <Stack direction='row' alignItems='end'>
+                    <Typography pt={1} variant='body' fontWeight={'bold'}>
+                      최종 목표:{' '}
+                      {targetWeight >= startWeight
+                        ? '+' + (targetWeight - startWeight).toFixed(1)
+                        : (targetWeight - startWeight).toFixed(1)}{' '}
+                      KG
+                    </Typography>
+                    <Typography color='gray' variant='body2' ml={1}>
+                      ({startWeight} KG → {targetWeight} KG)
+                    </Typography>
+                  </Stack>
+                </LocalizationProvider>
               )}
-              <Stack flexDirection={'row'} alignItems='end'>
+              <Typography variant='caption'>{dietPlanText}</Typography>
+              <Typography variant='caption' color={'tomato'}>
+                by {formatDateToString(endDate)}
+              </Typography>
+
+              {/* <Stack flexDirection={'row'} alignItems='end'>
                 <Typography pt={1} variant='h6' fontWeight={700}>
                   이번 목표:{' '}
                   {thisPlanTargetWeight >= startWeight
@@ -670,10 +674,11 @@ function Profile() {
                 <Typography variant='body2' ml={1} mb={0.5}>
                   ({startWeight} KG → {thisPlanTargetWeight} KG)
                 </Typography>
-              </Stack>
+              </Stack> */}
+              {/* 
               <Typography mt={-0.5} variant='caption'>
                 by {dateObjectToString(thisPlanAchieveDate)}
-              </Typography>
+              </Typography> */}
               <V.VictoryChart
                 scale={{ x: 'time', y: 'linear' }}
                 containerComponent={
@@ -763,7 +768,83 @@ function Profile() {
           )}
         </Stack>
       </Stack>
-    </>
+
+      <Stack spacing={2} id='basic-information'>
+        <Stack direction='row' justifyContent='space-between'>
+          <Typography variant='h5' fontWeight='normal'>
+            Basic Info.
+          </Typography>
+          <Button onClick={handleLogout}>Log out</Button>
+        </Stack>
+        <TextField label='Name' value={name} variant='standard' disabled />
+        <TextField
+          label='Phone'
+          value={phoneNumber}
+          variant='standard'
+          disabled
+        />
+        <FormControl fullWidth>
+          <FormLabel id='demo-radio-buttons-group-label'>Gender</FormLabel>
+          <RadioGroup
+            aria-labelledby='demo-radio-buttons-group-label'
+            name='radio-buttons-group'
+            onChange={(e) => {
+              setGender(e.target.value)
+            }}
+            value={gender}
+          >
+            <FormControlLabel
+              disabled
+              value='female'
+              control={<Radio />}
+              label='Female 🙋🏻‍♀️'
+            />
+            <FormControlLabel
+              disabled
+              value='male'
+              control={<Radio />}
+              label='Male 🙋🏻‍♂️'
+            />
+          </RadioGroup>
+        </FormControl>
+
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <DatePicker
+            inputFormat={'yyyy-MM-dd'}
+            mask={'____-__-__'}
+            disabled
+            openTo='year'
+            views={['year', 'month', 'day']}
+            label='Birthday'
+            value={birthday}
+            onChange={(newValue) => {
+              setBirthday(newValue)
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                helperText={null}
+                fullWidth
+                variant='standard'
+              />
+            )}
+          />
+        </LocalizationProvider>
+        <TextField
+          disabled
+          value={height}
+          fullWidth
+          label='Height'
+          InputProps={{
+            endAdornment: <InputAdornment position='end'>CM</InputAdornment>,
+            inputMode: 'numeric',
+          }}
+          type='number'
+          variant='standard'
+          placeholder='165'
+        />
+      </Stack>
+    </Stack>
   )
 }
 

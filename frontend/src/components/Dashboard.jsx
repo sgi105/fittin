@@ -67,6 +67,8 @@ function Dashboard() {
   // when loaded, set relevant states
   useEffect(() => {
     if (user) {
+      console.log(user)
+
       let weights = user.weightLogs
       setWeights(weights)
 
@@ -157,13 +159,9 @@ function Dashboard() {
     console.log('setting progress')
 
     setProgress(
-      Math.abs(
-        averageWeightPlotData[averageWeightPlotData?.length - 1]?.y -
-          user?.goals[0]?.startWeight
-      ) /
-        Math.abs(
-          user?.goals[0]?.thisPlanTargetWeight - user?.goals[0]?.startWeight
-        )
+      (averageWeightPlotData[averageWeightPlotData?.length - 1]?.y -
+        user?.goals[0]?.startWeight) /
+        (user?.goals[0]?.thisPlanTargetWeight - user?.goals[0]?.startWeight)
     )
 
     // setProgress(1.2)
@@ -392,15 +390,23 @@ function Dashboard() {
         >
           <Stack spacing={1} pt={2}>
             <Stack spacing={1}>
-              <Typography variant='h5' textAlign='center'>
-                🎯 {user?.goals[0]?.dietMode === 'gain' ? 'BULK' : 'DIET'}
-                {'  ' +
-                  (
-                    user?.goals[0]?.thisPlanTargetWeight -
-                    user?.goals[0]?.startWeight
-                  ).toFixed(1) +
-                  'KG'}
-              </Typography>
+              <Stack>
+                {user && (
+                  <Typography
+                    variant='h6'
+                    fontWeight={'bold'}
+                    textAlign='center'
+                  >
+                    🎯이번달 목표: {(user?.goals[0]?.startWeight).toFixed(1)}
+                    {' → '}
+                    {(user?.goals[0]?.thisPlanTargetWeight).toFixed(1)}
+                    KG
+                  </Typography>
+                )}
+                <Typography variant='caption' textAlign='center'>
+                  by 2022-08-14
+                </Typography>
+              </Stack>
               <Stack spacing={1}>
                 <Stack
                   spacing={0.5}
