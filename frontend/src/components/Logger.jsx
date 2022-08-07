@@ -41,6 +41,9 @@ function Logger() {
   // inputs
   const [date, setDate] = useState(removeTime(new Date()))
   const [weight, setWeight] = useState('')
+  const [calorie, setCalorie] = useState('0')
+  const [exerciseDuration, setExerciseDuration] = useState('0')
+  const [challenge, setChallenge] = useState(null)
   const [habits, setHabits] = useState(() => [])
 
   // from db
@@ -77,9 +80,10 @@ function Logger() {
   }, [phoneNumber])
 
   useEffect(() => {
-    if (weight > 0) setShowButton(true)
+    if (weight > 0 && calorie && exerciseDuration && challenge !== null)
+      setShowButton(true)
     else setShowButton(false)
-  }, [weight])
+  }, [weight, calorie, exerciseDuration, challenge])
 
   useEffect(() => {
     loadSelectedDateWeight(weights)
@@ -115,42 +119,6 @@ function Logger() {
     }
   }, [user])
 
-  // const getUserData = async () => {
-  //   try {
-  //     const res = await axios.get(url.users + `/${phoneNumber}`, {
-  //       baseURL: '/',
-  //     })
-
-  //     if (res.data.status === 200) {
-  //       let user = res.data.data
-  //       console.log(user)
-  //       let weights = user.weightLogs
-  //       setWeights(weights)
-
-  //       // get the most recent weight data if available
-  //       if (weights.length > 0) {
-  //         let recentWeight = weights[weights.length - 1].weight
-  //         let recentDate = weights[weights.length - 1].date
-  //         setRecentWeight({
-  //           weight: recentWeight,
-  //           date: new Date(recentDate),
-  //         })
-  //         // get the current day's weight data if available
-  //         loadSelectedDateWeight(weights)
-  //       }
-
-  //       // get the current date's habitLog and update the habit state
-  //       const newHabitLogs = user.habitLogs
-  //       setHabitLogs(newHabitLogs)
-  //       if (user.habitLogs.length > 0) {
-  //         const selectedDateHabitLog = loadSelectedDateHabitLog(newHabitLogs)
-  //       }
-  //     }
-  //   } catch (err) {
-  //     console.log(err)
-  //   }
-  // }
-
   const handleCloseSnackBar = (event, reason) => {
     if (reason === 'clickaway') {
       return
@@ -176,6 +144,10 @@ function Logger() {
     setHabits(newHabits)
   }
 
+  const handleChallenge = (event, newChallenge) => {
+    setChallenge(newChallenge)
+  }
+
   const loadSelectedDateHabitLog = (habitLogs) => {
     let selectedDateHabitLog = false
 
@@ -190,6 +162,11 @@ function Logger() {
     const newHabits = []
     if (selectedDateHabitLog?.exercise) newHabits.push('exercise')
     if (selectedDateHabitLog?.diet) newHabits.push('diet')
+    if (selectedDateHabitLog?.calorie) setCalorie(selectedDateHabitLog.calorie)
+    if (selectedDateHabitLog?.exerciseDuration)
+      setExerciseDuration(selectedDateHabitLog.exerciseDuration)
+    if (selectedDateHabitLog?.challenge !== null)
+      setChallenge(selectedDateHabitLog.challenge)
     setHabits(newHabits)
   }
 
@@ -225,6 +202,14 @@ function Logger() {
 
   const handleWeightInput = (e) => {
     if (e.target.value.length < 6) setWeight(e.target.value)
+  }
+
+  const handleCalorieInput = (e) => {
+    if (e.target.value.length < 6) setCalorie(e.target.value)
+  }
+
+  const handleExerciseDurationInput = (e) => {
+    if (e.target.value.length < 4) setExerciseDuration(e.target.value)
   }
 
   const handleSubmit = async () => {
@@ -352,6 +337,9 @@ function Logger() {
       weigh: weightScore,
       exercise: habits.includes('exercise'),
       diet: habits.includes('diet'),
+      calorie,
+      exerciseDuration,
+      challenge,
     }
 
     const res = await axios.post(
@@ -369,6 +357,7 @@ function Logger() {
 
     console.log(res)
   }
+  // end of saveWeight()
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') handleSubmit()
@@ -406,9 +395,10 @@ function Logger() {
             border: '1px solid',
             borderColor: 'rgba(0, 0, 0, 0.23)',
             borderRadius: '4px',
-            height: '300px',
+            // height: '300px',
+            padding: '1em',
           }}
-          onClick={handleInputClick}
+          // onClick={handleInputClick}
         >
           {recentWeight.weight && (
             <Typography variant='caption' color='gray'>
@@ -416,27 +406,78 @@ function Logger() {
               {formatDateToString(recentWeight.date)})
             </Typography>
           )}
+          <Stack spacing={0.2} justifyContent='center' alignItems='center'>
+            <Typography variant='caption' fontWeight='bold' mb={-1}>
+              몸무게
+            </Typography>
+            <TextField
+              // disabled
+              id='weight-input'
+              variant='standard'
+              placeholder={recentWeight.weight?.toFixed(1) || '00.0'}
+              type='number'
+              value={weight}
+              onChange={handleWeightInput}
+              onKeyDown={handleKeyDown}
+              inputProps={{ inputMode: 'decimal' }}
+              sx={{
+                input: { textAlign: 'center', fontSize: '2em' },
+                width: 150,
+              }}
+            />
+            <Typography color='gray'>KG</Typography>
+          </Stack>
+          <Stack spacing={0.2} justifyContent='center' alignItems='center'>
+            <Typography variant='caption' fontWeight='bold' mb={-1}>
+              칼로리
+            </Typography>
+            <TextField
+              // disabled
+              id='calorie-input'
+              variant='standard'
+              // placeholder={recentWeight.weight?.toFixed(1) || '00.0'}
+              type='number'
+              value={calorie}
+              onChange={handleCalorieInput}
+              onKeyDown={handleKeyDown}
+              inputProps={{ inputMode: 'decimal' }}
+              sx={{
+                input: { textAlign: 'center', fontSize: '2em' },
+                width: 150,
+              }}
+            />
+            <Typography color='gray'>KCAL</Typography>
+          </Stack>
+          <Stack spacing={0.2} justifyContent='center' alignItems='center'>
+            <Typography variant='caption' fontWeight='bold' mb={-1}>
+              운동 시간
+            </Typography>
+            <TextField
+              // disabled
+              id='exerciseDuration-input'
+              variant='standard'
+              // placeholder={recentWeight.weight?.toFixed(1) || '00.0'}
+              type='number'
+              value={exerciseDuration}
+              onChange={handleExerciseDurationInput}
+              onKeyDown={handleKeyDown}
+              inputProps={{ inputMode: 'decimal' }}
+              sx={{
+                input: { textAlign: 'center', fontSize: '2em' },
+                width: 150,
+              }}
+            />
+            <Typography color='gray'>MIN</Typography>
+          </Stack>
 
-          <TextField
-            // disabled
-            id='weight-input'
-            variant='standard'
-            placeholder={recentWeight.weight?.toFixed(1) || '00.0'}
-            type='number'
-            value={weight}
-            onChange={handleWeightInput}
-            onKeyDown={handleKeyDown}
-            inputProps={{ inputMode: 'decimal' }}
-            sx={{
-              input: { textAlign: 'center', fontSize: '3em' },
-              width: 150,
-            }}
-          />
-          <Typography color='gray'>KG</Typography>
           <Stack alignItems='center'>
+            <Typography variant='caption' fontWeight='bold' mb={-2}>
+              챌린지
+            </Typography>
             <ToggleButtonGroup
-              value={habits}
-              onChange={handleHabits}
+              value={challenge}
+              exclusive
+              onChange={handleChallenge}
               aria-label='text formatting'
               sx={{
                 pt: 3,
@@ -444,7 +485,7 @@ function Logger() {
               pt='3'
             >
               <ToggleButton
-                value='exercise'
+                value={true}
                 aria-label='bold'
                 sx={{
                   '&.Mui-selected:hover, &.Mui-selected': {
@@ -458,10 +499,10 @@ function Logger() {
                   // },
                 }}
               >
-                오운완 💪
+                YES 💪
               </ToggleButton>
               <ToggleButton
-                value='diet'
+                value={false}
                 aria-label='italic'
                 sx={{
                   '&.Mui-selected:hover, &.Mui-selected': {
@@ -472,7 +513,7 @@ function Logger() {
                   },
                 }}
               >
-                건강식 🥦
+                NOO ❌
               </ToggleButton>
             </ToggleButtonGroup>
             <Typography color='gray' variant='caption'>

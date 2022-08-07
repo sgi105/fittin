@@ -8,6 +8,8 @@ const {
   runUtil,
   getTotalHabitScoreBoard,
   autoUpdateHabits,
+  setGroupToUsers,
+  getGroupRanking,
 } = require('../controllers/userController.js')
 
 router.post('/', createUser)
@@ -17,5 +19,7 @@ router.post('/userdata', getUser)
 router.put('/', updateUser)
 router.post('/log', logWeight)
 router.get('/totalhabitscoreboard', getTotalHabitScoreBoard)
+router.put('/setgroup', setGroupToUsers)
+router.get('/groupscore', getGroupRanking)
 
 module.exports = router

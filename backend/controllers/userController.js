@@ -199,6 +199,7 @@ const getTotalHabitScoreBoard = asyncHandler(async (req, res) => {
   })
 })
 
+// this fires every day 24:00 (UTC 15:00)
 const autoUpdateHabits = asyncHandler(async (req, res) => {
   let UTCHour = req.params.UTCHour
   console.log(UTCHour)
@@ -290,6 +291,124 @@ const makeUsersNonActive = async (req, res) => {
   res.status(200).json({
     status: 200,
     data: result,
+  })
+}
+
+const setGroupToUsers = async (req, res) => {
+  const groupArray = [
+    { phoneNumber: '01027629310', groupName: '2K' },
+    { phoneNumber: '01045534446', groupName: '2K' },
+    { phoneNumber: '01089327565', groupName: '2K' },
+    { phoneNumber: '01045663614', groupName: '2K' },
+    { phoneNumber: '01027766170', groupName: '8000보 1' },
+    { phoneNumber: '01082241059', groupName: '8000보 1' },
+    { phoneNumber: '01024601631', groupName: '8000보 1' },
+    { phoneNumber: '01077048103', groupName: '8000보 1' },
+    { phoneNumber: '01055528126', groupName: '8000보 1' },
+    { phoneNumber: '01026694823', groupName: '8000보 2' },
+    { phoneNumber: '01063743269', groupName: '8000보 2' },
+    { phoneNumber: '01033973394', groupName: '8000보 2' },
+    { phoneNumber: '01026878262', groupName: '복근1' },
+    { phoneNumber: '01089594101', groupName: '복근1' },
+    { phoneNumber: '01041703400', groupName: '복근1' },
+    { phoneNumber: '01083783816', groupName: '복근1' },
+    { phoneNumber: '01047525128', groupName: '복근1' },
+    { phoneNumber: '01021803323', groupName: '복근1' },
+    { phoneNumber: '01075345734', groupName: '복근2' },
+    { phoneNumber: '01099957815', groupName: '복근2' },
+    { phoneNumber: '01087449131', groupName: '복근2' },
+    { phoneNumber: '01089886122', groupName: '복근2' },
+    { phoneNumber: '01045571842', groupName: '복근2' },
+    { phoneNumber: '01062060327', groupName: '팔뚝' },
+    { phoneNumber: '01047816088', groupName: '팔뚝' },
+    { phoneNumber: '01088877551', groupName: '팔뚝' },
+    { phoneNumber: '01080826580', groupName: '팔뚝' },
+    { phoneNumber: '01030244214', groupName: '팔뚝' },
+    { phoneNumber: '01099542762', groupName: '팔뚝' },
+    { phoneNumber: '01042403121', groupName: '팔뚝' },
+  ]
+
+  let result = []
+
+  groupArray.forEach(async (elem) => {
+    const { phoneNumber, groupName } = elem
+    const user = await User.findOne({ phoneNumber })
+    if (user) {
+      user.groupName = groupName
+      await user.save()
+      result.push(user)
+    } else {
+      console.log(phoneNumber, groupName, 'not found')
+    }
+  })
+
+  return res.status(200).json({
+    status: 200,
+    data: result,
+  })
+}
+
+const getGroupRanking = async (req, res) => {
+  // get list of group names
+  const groupNames = ['2K', '8000보 1', '8000보 2', '복근1', '복근2', '팔뚝']
+
+  let result = []
+  let userScoreResult = []
+
+  // for each group
+  for (const groupName of groupNames) {
+    // create group score
+    let groupScore = 0
+
+    // find all users
+    const users = await User.find({ groupName })
+
+    // for each user
+    users.forEach((user) => {
+      let userScore = 0
+      let lastDate
+
+      user.habitLogs.forEach((habitLog) => {
+        // from 2022/07/17, add all habit counts
+        if (habitLog.date > new Date('2022/07/17')) {
+          habitLog.weigh && userScore++
+          habitLog.exercise && userScore++
+          habitLog.diet && userScore++
+
+          if (habitLog.weigh) {
+            lastDate = habitLog.date
+          }
+        }
+      })
+      console.log(userScore)
+
+      userScoreResult.push({
+        name: user.name,
+        score: userScore,
+        lastDate,
+      })
+
+      // add to group score
+      groupScore += userScore
+    })
+
+    // push to result array
+    groupScore = (groupScore / users.length).toFixed(2)
+
+    result.push({ groupName, groupScore })
+  }
+
+  result.sort((a, b) => {
+    return b.groupScore - a.groupScore
+  })
+
+  userScoreResult.sort((a, b) => {
+    return b.score - a.score
+  })
+
+  res.status(200).json({
+    status: 200,
+    data: { result, userScoreResult },
   })
 }
 
@@ -414,6 +533,9 @@ const addNewHabitGenerateFailedHabitsAndUpdatePoints = async (
         weigh: '',
         diet: false,
         exercise: false,
+        calorie: 0,
+        exerciseDuration: 0,
+        challenge: false,
       })
     }
   }
@@ -483,4 +605,6 @@ module.exports = {
   runUtil,
   getTotalHabitScoreBoard,
   autoUpdateHabits,
+  setGroupToUsers,
+  getGroupRanking,
 }

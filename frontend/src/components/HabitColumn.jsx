@@ -36,7 +36,7 @@ function HabitBox({ name, state = false }) {
     else color = dietHabitColor
   }
 
-  let size = '45px'
+  let size = '20px'
 
   return (
     <Box
